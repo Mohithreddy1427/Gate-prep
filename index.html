@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GATE CSE + DA Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon">⬡</span>
+      <span class="brand-text">GATE<em>Track</em></span>
+    </div>
+
+```
+<div class="sidebar-section">
+  <div class="streak-card">
+    <div class="streak-row">
+      <span class="streak-label">🔥 Streak</span>
+      <span class="streak-val" id="currentStreak">0</span>
+    </div>
+    <div class="streak-row">
+      <span class="streak-label">🏆 Longest</span>
+      <span class="streak-val" id="longestStreak">0</span>
+    </div>
+    <div class="streak-warn" id="streakWarn"></div>
+  </div>
+</div>
+
+<div class="sidebar-section">
+  <div class="overall-ring-wrap">
+    <svg class="ring-svg" viewBox="0 0 80 80">
+      <circle class="ring-bg" cx="40" cy="40" r="34"/>
+      <circle class="ring-fg" id="overallRing" cx="40" cy="40" r="34"
+        stroke-dasharray="213.6"
+        stroke-dashoffset="213.6"/>
+    </svg>
+    <div class="ring-label">
+      <span id="overallPct">0%</span>
+      <small>Overall</small>
+    </div>
+  </div>
+</div>
+
+<div class="sidebar-section nav-phases" id="navPhases"></div>
+
+<div class="sidebar-section">
+  <div class="target-section">
+    <label class="section-label">🎯 Target Date</label>
+    <input type="date" id="globalTargetDate" class="date-input" />
+    <div class="on-track" id="onTrackStatus"></div>
+  </div>
+</div>
+
+<div class="sidebar-section">
+  <button class="sidebar-btn" onclick="openAnalytics()">📊 Analytics</button>
+</div>
+```
+
+  </nav>
+
+  <!-- MAIN -->
+
+  <main class="main" id="mainContent">
+
+```
+<!-- TOP BAR -->
+<header class="topbar">
+  <button class="hamburger" id="hamburger" onclick="toggleSidebar()">☰</button>
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input type="text" id="searchInput" placeholder="Search chapters…" autocomplete="off" />
+    <button class="search-clear" id="searchClear" onclick="clearSearch()">×</button>
+  </div>
+  <div class="filter-chips">
+    <button class="chip" id="chipIncomplete" onclick="toggleFilter('incomplete')">Incomplete</button>
+    <button class="chip" id="chipRevision" onclick="toggleFilter('revision')">Rev Pending</button>
+  </div>
+</header>
+
+<!-- ALERT -->
+<div class="alert-bar" id="alertBar"></div>
+
+<!-- ROADMAP -->
+<div class="roadmap" id="roadmapRoot"></div>
+```
+
+  </main>
+
+  <!-- ANALYTICS MODAL -->
+
+  <div class="modal-overlay" id="analyticsModal" onclick="closeAnalytics(event)">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeAnalytics()">×</button>
+      <h2 class="modal-title">📊 Analytics Dashboard</h2>
+      <div id="analyticsContent"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+
+</body>
+</html>
