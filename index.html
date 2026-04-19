@@ -4,10 +4,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>GATE CSE + DA Tracker</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=3" />
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- CRITICAL INLINE STYLES: layout skeleton that must work even if style.css is cached/stale -->
+
+  <style>
+    /* Body layout — sidebar left, main right */
+    body { display: flex; min-height: 100vh; margin: 0; font-family: sans-serif; }
+    .sidebar {
+      width: 260px; min-width: 260px; flex-shrink: 0;
+      position: fixed; top: 0; left: 0; height: 100vh;
+      overflow-y: auto; z-index: 100;
+      background: #fff; border-right: 1px solid #e2ddd5;
+    }
+    .main { margin-left: 260px; flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    /* SVG ring — MUST stay 72×72, never stretch */
+    .ring-svg {
+      width: 72px !important; height: 72px !important;
+      max-width: 72px !important; max-height: 72px !important;
+      display: block; flex-shrink: 0;
+    }
+    /* Phase blocks visible by default */
+    .phase-block { display: block; }
+    .phase-body  { display: block; }
+    .phase-body.collapsed { display: none; }
+    .topic-body.collapsed { display: none; }
+    .subtopic-body.collapsed { display: none; }
+    .hidden-row { display: none !important; }
+    /* Table baseline */
+    .chapter-table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 540px; }
+    .chapter-table-wrap { overflow-x: auto; border: 1px solid #e2ddd5; border-radius: 8px; margin: 4px 0 10px; }
+    /* Mobile */
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.mobile-open { transform: translateX(0); }
+      .main { margin-left: 0; }
+    }
+  </style>
+
 </head>
 <body>
 
@@ -36,11 +76,23 @@
 
 <div class="sidebar-section">
   <div class="overall-ring-wrap">
-    <svg class="ring-svg" viewBox="0 0 80 80" width="72" height="72" xmlns="http://www.w3.org/2000/svg">
-      <circle class="ring-bg" cx="40" cy="40" r="34" fill="none" stroke="#f0ede6" stroke-width="8"/>
-      <circle class="ring-fg" id="overallRing" cx="40" cy="40" r="34"
-        fill="none" stroke="#c84b31" stroke-width="8" stroke-linecap="round"
-        stroke-dasharray="213.628" stroke-dashoffset="213.628"/>
+    <!--
+      width/height as HTML attrs + fill="none" on circles are mandatory.
+      These are presentation attributes — they work even when CSS is absent
+      or partially cached. Never rely solely on CSS for SVG sizing.
+    -->
+    <svg class="ring-svg"
+         viewBox="0 0 80 80"
+         width="72" height="72"
+         xmlns="http://www.w3.org/2000/svg"
+         style="width:72px;height:72px;max-width:72px;max-height:72px;display:block;flex-shrink:0;transform:rotate(-90deg);overflow:visible;">
+      <circle id="ringBg" cx="40" cy="40" r="34"
+              fill="none" stroke="#e2ddd5" stroke-width="8"/>
+      <circle id="overallRing" cx="40" cy="40" r="34"
+              fill="none" stroke="#c84b31" stroke-width="8"
+              stroke-linecap="round"
+              stroke-dasharray="213.628"
+              stroke-dashoffset="213.628"/>
     </svg>
     <div class="ring-label">
       <span id="overallPct">0%</span>
@@ -71,7 +123,6 @@
   <main class="main" id="mainContent">
 
 ```
-<!-- TOP BAR -->
 <header class="topbar">
   <button class="hamburger" id="hamburger" onclick="toggleSidebar()">☰</button>
   <div class="search-wrap">
@@ -85,11 +136,11 @@
   </div>
 </header>
 
-<!-- ALERT -->
 <div class="alert-bar" id="alertBar"></div>
 
-<!-- ROADMAP -->
-<div class="roadmap" id="roadmapRoot"></div>
+<div class="roadmap" id="roadmapRoot">
+  <!-- Phases injected by script.js -->
+</div>
 ```
 
   </main>
@@ -104,7 +155,7 @@
     </div>
   </div>
 
-  <script src="script.js?v=3"></script>
+  <script src="script.js"></script>
 
 </body>
 </html>
