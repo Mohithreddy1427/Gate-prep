@@ -605,6 +605,17 @@ wrap.className = “chapter-table-wrap”;
 const table = document.createElement(“table”);
 table.className = “chapter-table”;
 
+// colgroup — required so table-layout:fixed distributes columns correctly.
+// Without this, fixed layout splits columns evenly which misaligns ch name.
+const colgroup = document.createElement(“colgroup”);
+const colCh = document.createElement(“col”); // chapter name: flexible
+colgroup.appendChild(colCh);
+COLS.forEach(() => {
+const col = document.createElement(“col”); // each checkbox col: fixed via CSS
+colgroup.appendChild(col);
+});
+table.appendChild(colgroup);
+
 // thead
 const thead = document.createElement(“thead”);
 const hRow  = document.createElement(“tr”);
