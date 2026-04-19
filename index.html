@@ -12,10 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 
-  <!-- CRITICAL INLINE STYLES: layout skeleton that must work even if style.css is cached/stale -->
-
   <style>
-    /* Body layout — sidebar left, main right */
     body { display: flex; min-height: 100vh; margin: 0; font-family: sans-serif; }
     .sidebar {
       width: 260px; min-width: 260px; flex-shrink: 0;
@@ -24,23 +21,19 @@
       background: #fff; border-right: 1px solid #e2ddd5;
     }
     .main { margin-left: 260px; flex: 1; min-width: 0; display: flex; flex-direction: column; }
-    /* SVG ring — MUST stay 72×72, never stretch */
     .ring-svg {
       width: 72px !important; height: 72px !important;
       max-width: 72px !important; max-height: 72px !important;
       display: block; flex-shrink: 0;
     }
-    /* Phase blocks visible by default */
     .phase-block { display: block; }
     .phase-body  { display: block; }
     .phase-body.collapsed { display: none; }
     .topic-body.collapsed { display: none; }
     .subtopic-body.collapsed { display: none; }
     .hidden-row { display: none !important; }
-    /* Table baseline */
     .chapter-table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 540px; }
     .chapter-table-wrap { overflow-x: auto; border: 1px solid #e2ddd5; border-radius: 8px; margin: 4px 0 10px; }
-    /* Mobile */
     @media (max-width: 768px) {
       .sidebar { transform: translateX(-100%); }
       .sidebar.mobile-open { transform: translateX(0); }
@@ -76,11 +69,6 @@
 
 <div class="sidebar-section">
   <div class="overall-ring-wrap">
-    <!--
-      width/height as HTML attrs + fill="none" on circles are mandatory.
-      These are presentation attributes — they work even when CSS is absent
-      or partially cached. Never rely solely on CSS for SVG sizing.
-    -->
     <svg class="ring-svg"
          viewBox="0 0 80 80"
          width="72" height="72"
@@ -121,21 +109,20 @@
   <!-- MAIN -->
 
   <main class="main" id="mainContent">
+    <header class="topbar">
+      <button class="hamburger" id="hamburger" onclick="toggleSidebar()">☰</button>
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="searchInput" placeholder="Search chapters…" autocomplete="off" />
+        <button class="search-clear" id="searchClear" onclick="clearSearch()">×</button>
+      </div>
+      <div class="filter-chips">
+        <button class="chip" id="chipIncomplete" onclick="toggleFilter('incomplete')">Incomplete</button>
+        <button class="chip" id="chipRevision" onclick="toggleFilter('revision')">Rev Pending</button>
+      </div>
+    </header>
 
 ```
-<header class="topbar">
-  <button class="hamburger" id="hamburger" onclick="toggleSidebar()">☰</button>
-  <div class="search-wrap">
-    <span class="search-icon">⌕</span>
-    <input type="text" id="searchInput" placeholder="Search chapters…" autocomplete="off" />
-    <button class="search-clear" id="searchClear" onclick="clearSearch()">×</button>
-  </div>
-  <div class="filter-chips">
-    <button class="chip" id="chipIncomplete" onclick="toggleFilter('incomplete')">Incomplete</button>
-    <button class="chip" id="chipRevision" onclick="toggleFilter('revision')">Rev Pending</button>
-  </div>
-</header>
-
 <div class="alert-bar" id="alertBar"></div>
 
 <div class="roadmap" id="roadmapRoot">
