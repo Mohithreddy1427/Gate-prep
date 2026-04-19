@@ -1,623 +1,1042 @@
-/* ===== DESIGN TOKENS ===== */
-:root {
-  --bg: #f7f5f0;
-  --surface: #ffffff;
-  --surface2: #f0ede6;
-  --border: #e2ddd5;
-  --text: #1a1814;
-  --text2: #6b6560;
-  --text3: #9e9790;
-  --accent: #c84b31;
-  --accent2: #e8956d;
-  --green: #2d7a4f;
-  --green-bg: #eaf4ef;
-  --yellow: #b87e0a;
-  --yellow-bg: #fdf3dc;
-  --red: #c0392b;
-  --red-bg: #fdecea;
-  --phase1: #5b4fcf;
-  --phase2: #c84b31;
-  --phase3: #2d7a4f;
-  --phase4: #b87e0a;
-  --phaseP: #0e7490;
-  --sidebar-w: 260px;
-  --radius: 10px;
-  --shadow: 0 2px 12px rgba(0,0,0,0.07);
-  --font-body: 'Plus Jakarta Sans', sans-serif;
-  --font-display: 'Fraunces', serif;
-  --font-mono: 'DM Mono', monospace;
-  --transition: 0.18s ease;
+/* =========================================================
+GATE CSE + DA TRACKER — script.js  (v2 — fixed)
+Modular vanilla JS | No frameworks | GitHub Pages safe
+========================================================= */
+
+/* ─── 1. ROADMAP DATA ─── */
+const ROADMAP = [
+{
+id: “phase1”,
+title: “Phase 1: Foundations (Core Math + Programming)”,
+subtitle: “Build the base that unlocks everything else”,
+color: “#5b4fcf”,
+topics: [
+{
+id: “t1”, number: “1”,
+title: “Programming & Problem Solving”,
+meta: “Common (CSE + DA) | High | Easy–Medium”,
+subtopics: [
+{ id: “st1_1”, title: “Basics of Programming”,       chapters: [“Basics of Programming”] },
+{ id: “st1_2”, title: “Variables & Data Types”,      chapters: [“Variables, Data Types”] },
+{ id: “st1_3”, title: “Control Flow”,                chapters: [“Control Flow (if, loops)”] },
+{ id: “st1_4”, title: “Functions & Recursion”,       chapters: [“Functions & Recursion”] },
+{ id: “st1_5”, title: “Complexity Thinking”,         chapters: [“Basic Complexity Thinking”, “Time Complexity”, “Space Complexity”] }
+]
+},
+{
+id: “t2”, number: “2”,
+title: “Discrete Mathematics (Core Math)”,
+meta: “Common | Very High | Medium | ~10–15%”,
+subtopics: [
+{ id: “st2_1”, title: “Logic”,                              chapters: [“Propositional Logic”, “Predicate Logic”] },
+{ id: “st2_2”, title: “Set Theory & Relations”,             chapters: [“Set Theory & Relations”] },
+{ id: “st2_3”, title: “Functions & Combinatorics”,          chapters: [“Functions”, “Combinatorics”] },
+{ id: “st2_4”, title: “Graph Theory Basics & Recurrence”,   chapters: [“Graph Theory (BASICS)”, “Recurrence Relations”] }
+]
+},
+{
+id: “t3”, number: “3”,
+title: “Core Probability (Core Math)”,
+meta: “Common | High | Medium | ~5–8%”,
+subtopics: [
+{ id: “st3_1”, title: “Probability Foundations”,            chapters: [“Probability Basics”, “Conditional Probability”] },
+{ id: “st3_2”, title: “Random Variables & Distributions”,   chapters: [“Random Variables”, “Distributions (Basic)”] }
+]
+}
+]
+},
+{
+id: “phase2”,
+title: “Phase 2: Core CSE (System + Logic Building)”,
+subtitle: “”,
+color: “#c84b31”,
+topics: [
+{
+id: “t4”, number: “4”,
+title: “Data Structures”,
+meta: “Common | Very High | Medium | ~10–12%”,
+subtopics: [
+{ id: “st4_1”, title: “Linear Structures”,   chapters: [“Arrays”, “Linked Lists”, “Stacks & Queues”] },
+{ id: “st4_2”, title: “Tree Structures”,     chapters: [“Trees”, “Binary Trees”, “BST”, “Heaps”] },
+{ id: “st4_3”, title: “Hashing & Graphs”,    chapters: [“Hashing”, “Graphs (Implementation)”] }
+]
+},
+{
+id: “t5”, number: “5”,
+title: “Algorithms”,
+meta: “Common | Very High | Hard | ~10–15%”,
+subtopics: [
+{ id: “st5_1”, title: “Analysis & Paradigms”, chapters: [“Complexity Analysis”, “Divide & Conquer”, “Greedy Algorithms”, “Dynamic Programming”] },
+{ id: “st5_2”, title: “Graph Algorithms”,     chapters: [“Graph Algorithms”, “BFS, DFS”, “Shortest Paths”, “Backtracking”] }
+]
+},
+{
+id: “t6”, number: “6”,
+title: “Computer Organization & Architecture (COA)”,
+meta: “CSE Only | High | Medium | ~8–10%”,
+subtopics: [
+{ id: “st6_1”, title: “Digital Fundamentals”, chapters: [“Number Systems”, “Boolean Algebra”] },
+{ id: “st6_2”, title: “CPU & Memory”,          chapters: [“Machine Instructions”, “CPU Organization”, “Memory Hierarchy”] }
+]
+},
+{
+id: “t7”, number: “7”,
+title: “Operating Systems”,
+meta: “CSE Only | Very High | Medium | ~10–12%”,
+subtopics: [
+{ id: “st7_1”, title: “Processes & Scheduling”, chapters: [“Processes & Threads”, “Scheduling”, “Deadlocks”] },
+{ id: “st7_2”, title: “Memory & Storage”,       chapters: [“Memory Management”, “Virtual Memory”, “File Systems”] }
+]
+},
+{
+id: “t8”, number: “8”,
+title: “Database Management Systems (DBMS)”,
+meta: “Common | High | Easy–Medium | ~8–10%”,
+subtopics: [
+{ id: “st8_1”, title: “Modeling & Querying”,        chapters: [“ER Model”, “Relational Model”, “SQL”] },
+{ id: “st8_2”, title: “Normalization & Transactions”, chapters: [“Normalization”, “Transactions”, “Concurrency Control”] }
+]
+},
+{
+id: “t9”, number: “9”,
+title: “Computer Networks (CN)”,
+meta: “CSE Only | Medium | Medium | ~6–8%”,
+subtopics: [
+{ id: “st9_1”, title: “Network Models”,       chapters: [“OSI Model”, “TCP/IP”] },
+{ id: “st9_2”, title: “Routing & Application”, chapters: [“Routing”, “Congestion Control”, “Application Layer”] }
+]
+},
+{
+id: “t10”, number: “10”,
+title: “Theory of Computation (TOC)”,
+meta: “CSE Only | Medium–High | Hard | ~6–8%”,
+subtopics: [
+{ id: “st10_1”, title: “Automata”,      chapters: [“Regular Languages”, “Finite Automata”, “Context-Free Grammars”, “Pushdown Automata”] },
+{ id: “st10_2”, title: “Computability”, chapters: [“Turing Machines”] }
+]
+}
+]
+},
+{
+id: “phase3”,
+title: “Phase 3: DA / AI Core (Dependency Math + Application)”,
+subtitle: “”,
+color: “#2d7a4f”,
+topics: [
+{
+id: “t11”, number: “11”,
+title: “Linear Algebra (Dependency Math)”,
+meta: “DA Only | Very High | Medium–Hard | ~10–12%”,
+subtopics: [
+{ id: “st11_1”, title: “Vectors & Matrices”,            chapters: [“Vectors”, “Matrices”] },
+{ id: “st11_2”, title: “Eigenvalues & Transformations”, chapters: [“Eigenvalues & Eigenvectors”, “Linear Transformations”] }
+]
+},
+{
+id: “t12”, number: “12”,
+title: “Statistics (Dependency Math)”,
+meta: “DA Only | High | Medium | ~8–10%”,
+subtopics: [
+{ id: “st12_1”, title: “Descriptive Stats”, chapters: [“Descriptive Statistics”, “Mean, Variance”] },
+{ id: “st12_2”, title: “Inferential Stats”,  chapters: [“Sampling”, “Estimation”, “Hypothesis Testing”] }
+]
+},
+{
+id: “t13”, number: “13”,
+title: “Machine Learning”,
+meta: “DA Only | Very High | Medium–Hard | ~15–20%”,
+subtopics: [
+{ id: “st13_1”, title: “Supervised Learning”,       chapters: [“Supervised Learning”, “Regression”, “Classification”] },
+{ id: “st13_2”, title: “Unsupervised & Evaluation”, chapters: [“Unsupervised Learning”, “Clustering”, “Model Evaluation”, “Overfitting & Regularization”] }
+]
+},
+{
+id: “t14”, number: “14”,
+title: “Artificial Intelligence”,
+meta: “DA Only | Medium | Medium | ~5–8%”,
+subtopics: [
+{ id: “st14_1”, title: “Search & Knowledge”, chapters: [“Search Algorithms”, “Knowledge Representation”, “Reasoning”, “Basics of NLP”] }
+]
+}
+]
+},
+{
+id: “phase4”,
+title: “Phase 4: Advanced + Remaining Math”,
+subtitle: “”,
+color: “#b87e0a”,
+topics: [
+{
+id: “t15”, number: “15”,
+title: “Advanced Probability & Statistics (Advanced Math)”,
+meta: “DA Only | Medium | Hard | Low–Medium”,
+subtopics: [
+{ id: “st15_1”, title: “Advanced Distributions & Inference”, chapters: [“Advanced Distributions”, “Bayesian Methods”, “Advanced Inference”] }
+]
+},
+{
+id: “t16”, number: “16”,
+title: “Optimization Techniques”,
+meta: “DA Only | Medium | Hard | ~5–8%”,
+subtopics: [
+{ id: “st16_1”, title: “Optimization Methods”, chapters: [“Gradient Descent”, “Convex Optimization”, “Lagrange Multipliers”] }
+]
+},
+{
+id: “t17”, number: “17”,
+title: “Full Revision + Weak Areas”,
+meta: “Common | Critical | High | Entire exam”,
+subtopics: [
+{ id: “st17_1”, title: “Revision”, chapters: [“Full Revision + Weak Areas”] }
+]
+}
+]
+},
+{
+id: “phaseP”,
+title: “General Aptitude (Parallel — Start Day 1)”,
+subtitle: “15 marks fixed — run in parallel throughout”,
+color: “#0e7490”,
+topics: [
+{
+id: “tP1”, number: “GA1”,
+title: “Verbal Ability”,
+meta: “Common | Very High | Easy–Medium | 15 marks”,
+subtopics: [
+{ id: “stP1_1”, title: “Reading & Comprehension”, chapters: [“Reading Comprehension”, “Sentence Completion”, “Vocabulary”, “Grammar”] }
+]
+},
+{
+id: “tP2”, number: “GA2”,
+title: “Quantitative Aptitude”,
+meta: “Common | Very High | Easy–Medium | 15 marks”,
+subtopics: [
+{ id: “stP2_1”, title: “Arithmetic”, chapters: [“Percentages”, “Ratios”, “Averages”, “Time & Work”, “Profit & Loss”, “Speed, Time & Distance”] }
+]
+},
+{
+id: “tP3”, number: “GA3”,
+title: “Analytical Ability”,
+meta: “Common | Very High | Easy–Medium | 15 marks”,
+subtopics: [
+{ id: “stP3_1”, title: “Reasoning & Puzzles”, chapters: [“Logical Reasoning”, “Series”, “Puzzles”] }
+]
+}
+]
+}
+];
+
+/* ─── 2. CONSTANTS ─── */
+const COLS       = [“Video”, “Notes”, “Problems”, “PYQs”, “Rev1”, “Rev2”];
+const COL_LABELS = { Video: “Video”, Notes: “Notes”, Problems: “Problems”, PYQs: “PYQs”, Rev1: “Rev 1”, Rev2: “Rev 2” };
+
+/* ─── 3. STATE ─── */
+let state = {
+checks:           {},
+streak:           { lastActiveDate: null, currentStreak: 0, longestStreak: 0 },
+targetDate:       null,
+collapsePhase:    {},
+collapseTopic:    {},
+collapseSubtopic: {}
+};
+
+/* Anti-cheat */
+let recentActions = [];
+let pendingChecks = {};
+const MIN_HOLD_MS  = 5000;
+const BURST_LIMIT  = 5;
+const BURST_WINDOW = 5000;
+
+/* ─── 4. PERSISTENCE ─── */
+function saveState() {
+try { localStorage.setItem(“gate_tracker_v4”, JSON.stringify(state)); } catch (e) {}
+}
+function loadState() {
+try {
+const raw = localStorage.getItem(“gate_tracker_v4”);
+if (raw) {
+const saved = JSON.parse(raw);
+// Merge carefully so new keys survive
+state.checks           = saved.checks           || {};
+state.streak           = saved.streak           || state.streak;
+state.targetDate       = saved.targetDate       || null;
+state.collapsePhase    = saved.collapsePhase    || {};
+state.collapseTopic    = saved.collapseTopic    || {};
+state.collapseSubtopic = saved.collapseSubtopic || {};
+}
+} catch (e) {}
 }
 
-/* ===== RESET ===== */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: var(--font-body);
-  background: var(--bg);
-  color: var(--text);
-  display: flex;
-  min-height: 100vh;
-  font-size: 14px;
-  line-height: 1.5;
+/* ─── 5. ID HELPERS ─── */
+function slugify(str) {
+return str.toLowerCase().replace(/[^a-z0-9]+/g, “*”).replace(/^*|_$/g, “”);
+}
+function cbId(phaseId, topicId, subId, chSlug, col) {
+return `cb__${phaseId}__${topicId}__${subId}__${chSlug}__${col}`;
+}
+function rowId(phaseId, topicId, subId, chSlug) {
+return `row__${phaseId}__${topicId}__${subId}__${chSlug}`;
 }
 
-/* ===== SIDEBAR ===== */
-.sidebar {
-  width: var(--sidebar-w);
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  position: fixed;
-  top: 0; left: 0;
-  height: 100vh;
-  overflow-y: auto;
-  z-index: 100;
-  transition: transform var(--transition);
-}
-.sidebar.hidden { transform: translateX(-100%); }
-
-.sidebar-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 20px 18px 16px;
-  border-bottom: 1px solid var(--border);
-}
-.brand-icon {
-  font-size: 22px;
-  color: var(--accent);
-  line-height: 1;
-}
-.brand-text {
-  font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: -0.5px;
-}
-.brand-text em {
-  font-style: italic;
-  color: var(--accent);
+/* ─── 6. PROGRESS HELPERS ─── */
+function chapterIds(phaseId, topicId, subId, ch) {
+const slug = slugify(ch);
+return COLS.map(col => cbId(phaseId, topicId, subId, slug, col));
 }
 
-.sidebar-section {
-  padding: 14px 14px;
-  border-bottom: 1px solid var(--border);
-}
-.section-label {
-  display: block;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text3);
-  margin-bottom: 8px;
+function chapterStatus(phaseId, topicId, subId, ch) {
+const ids     = chapterIds(phaseId, topicId, subId, ch);
+const checked = ids.filter(id => !!state.checks[id]).length;
+if (checked === 0)          return “notstarted”;
+if (checked === ids.length) return “completed”;
+return “inprogress”;
 }
 
-/* Streak card */
-.streak-card {
-  background: var(--surface2);
-  border-radius: var(--radius);
-  padding: 10px 12px;
-}
-.streak-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 3px 0;
-}
-.streak-label { font-size: 12px; color: var(--text2); }
-.streak-val {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--text);
-}
-.streak-warn {
-  font-size: 11px;
-  color: var(--red);
-  font-weight: 600;
-  margin-top: 6px;
-  text-align: center;
-  min-height: 14px;
+function topicProgress(phase, topic) {
+let total = 0, checked = 0;
+topic.subtopics.forEach(sub =>
+sub.chapters.forEach(ch =>
+chapterIds(phase.id, topic.id, sub.id, ch).forEach(id => {
+total++;
+if (state.checks[id]) checked++;
+})
+)
+);
+return { total, checked, pct: total ? Math.round(checked / total * 100) : 0 };
 }
 
-/* Ring */
-.overall-ring-wrap {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-.ring-svg { width: 72px; height: 72px; transform: rotate(-90deg); flex-shrink: 0; }
-.ring-bg { fill: none; stroke: var(--surface2); stroke-width: 8; }
-.ring-fg {
-  fill: none;
-  stroke: var(--accent);
-  stroke-width: 8;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 0.6s ease;
-}
-.ring-label {
-  display: flex;
-  flex-direction: column;
-}
-.ring-label span {
-  font-family: var(--font-display);
-  font-size: 26px;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1;
-}
-.ring-label small {
-  font-size: 11px;
-  color: var(--text3);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+function phaseProgress(phase) {
+let total = 0, checked = 0;
+phase.topics.forEach(topic => {
+const tp = topicProgress(phase, topic);
+total   += tp.total;
+checked += tp.checked;
+});
+return { total, checked, pct: total ? Math.round(checked / total * 100) : 0 };
 }
 
-/* Nav phases */
-.nav-phases { display: flex; flex-direction: column; gap: 4px; }
-.nav-phase-btn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: none;
-  border: none;
-  padding: 7px 10px;
-  border-radius: 7px;
-  cursor: pointer;
-  text-align: left;
-  font-family: var(--font-body);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text2);
-  transition: background var(--transition), color var(--transition);
-  width: 100%;
-}
-.nav-phase-btn:hover { background: var(--surface2); color: var(--text); }
-.nav-phase-pct {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text3);
+function overallProgress() {
+let total = 0, checked = 0;
+ROADMAP.forEach(phase => {
+const pp = phaseProgress(phase);
+total   += pp.total;
+checked += pp.checked;
+});
+return { total, checked, pct: total ? Math.round(checked / total * 100) : 0 };
 }
 
-/* Date / on-track */
-.date-input {
-  width: 100%;
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  padding: 6px 10px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  background: var(--surface);
-  color: var(--text);
-  outline: none;
-  cursor: pointer;
-}
-.date-input:focus { border-color: var(--accent); }
-.on-track {
-  margin-top: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  min-height: 18px;
-}
-.on-track.ok { color: var(--green); }
-.on-track.behind { color: var(--red); }
-
-.sidebar-btn {
-  width: 100%;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 9px 14px;
-  font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background var(--transition);
-}
-.sidebar-btn:hover { background: #b03a22; }
-
-/* ===== MAIN ===== */
-.main {
-  margin-left: var(--sidebar-w);
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  transition: margin-left var(--transition);
-}
-.main.full { margin-left: 0; }
-
-/* ===== TOPBAR ===== */
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 16px;
-}
-.hamburger {
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  color: var(--text2);
-  padding: 4px 6px;
-  border-radius: 6px;
-  flex-shrink: 0;
-}
-.hamburger:hover { background: var(--surface2); }
-
-.search-wrap {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 6px 10px;
-  max-width: 400px;
-}
-.search-icon { color: var(--text3); font-size: 16px; }
-.search-wrap input {
-  flex: 1;
-  border: none;
-  background: none;
-  outline: none;
-  font-family: var(--font-body);
-  font-size: 13px;
-  color: var(--text);
-}
-.search-clear {
-  background: none;
-  border: none;
-  color: var(--text3);
-  cursor: pointer;
-  font-size: 16px;
-  line-height: 1;
-  display: none;
-}
-.search-clear.visible { display: block; }
-
-.filter-chips { display: flex; gap: 6px; }
-.chip {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 5px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text2);
-  cursor: pointer;
-  transition: all var(--transition);
-  white-space: nowrap;
-}
-.chip.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
+/* ─── 7. STREAK ─── */
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+function yesterdayStr() {
+const d = new Date();
+d.setDate(d.getDate() - 1);
+return d.toISOString().slice(0, 10);
 }
 
-/* Alert */
-.alert-bar {
-  background: #fff3cd;
-  border-bottom: 2px solid #f59e0b;
-  color: #92400e;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 10px 18px;
-  text-align: center;
-  display: none;
-  transition: all 0.3s;
-}
-.alert-bar.visible { display: block; }
-.alert-bar.danger {
-  background: var(--red-bg);
-  border-color: var(--red);
-  color: var(--red);
+function recordValidActivity() {
+const today = todayStr();
+const last  = state.streak.lastActiveDate;
+if (last === today) return;
+
+state.streak.currentStreak = (last === yesterdayStr())
+? state.streak.currentStreak + 1
+: 1;
+state.streak.lastActiveDate = today;
+state.streak.longestStreak  = Math.max(state.streak.longestStreak, state.streak.currentStreak);
+saveState();
+renderStreakUI();
 }
 
-/* ===== ROADMAP ===== */
-.roadmap { padding: 20px 20px 60px; display: flex; flex-direction: column; gap: 24px; }
-
-/* PHASE */
-.phase-block {
-  background: var(--surface);
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  overflow: hidden;
+function checkStreakBroken() {
+const last = state.streak.lastActiveDate;
+if (last && last !== todayStr() && last !== yesterdayStr()) {
+state.streak.currentStreak = 0;
+saveState();
 }
-.phase-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 18px;
-  cursor: pointer;
-  user-select: none;
-  border-bottom: 1px solid var(--border);
-  transition: background var(--transition);
-}
-.phase-header:hover { background: var(--surface2); }
-.phase-color-dot {
-  width: 12px; height: 12px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.phase-title {
-  font-family: var(--font-display);
-  font-size: 17px;
-  font-weight: 700;
-  flex: 1;
-  color: var(--text);
-}
-.phase-badge {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  background: var(--surface2);
-  padding: 3px 9px;
-  border-radius: 20px;
-  color: var(--text2);
-}
-.phase-progress-bar-wrap {
-  height: 4px;
-  background: var(--surface2);
-  border-radius: 0;
-}
-.phase-progress-bar {
-  height: 100%;
-  border-radius: 0;
-  transition: width 0.5s ease;
-}
-.phase-toggle { font-size: 12px; color: var(--text3); margin-left: 6px; transition: transform 0.2s; }
-.phase-toggle.open { transform: rotate(180deg); }
-.phase-body { padding: 0; }
-.phase-body.collapsed { display: none; }
-
-/* TOPIC */
-.topic-block { border-bottom: 1px solid var(--border); }
-.topic-block:last-child { border-bottom: none; }
-.topic-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 11px 18px;
-  cursor: pointer;
-  user-select: none;
-  transition: background var(--transition);
-}
-.topic-header:hover { background: var(--surface2); }
-.topic-number {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text3);
-  width: 20px;
-  flex-shrink: 0;
-}
-.topic-title {
-  font-size: 13px;
-  font-weight: 700;
-  flex: 1;
-  color: var(--text);
-}
-.topic-meta { font-size: 11px; color: var(--text3); }
-.topic-pct {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text3);
-  min-width: 32px;
-  text-align: right;
-}
-.topic-toggle { font-size: 10px; color: var(--text3); margin-left: 4px; transition: transform 0.2s; }
-.topic-toggle.open { transform: rotate(180deg); }
-.topic-body.collapsed { display: none; }
-
-/* SUBTOPIC */
-.subtopic-block { border-left: 3px solid var(--border); margin: 0 18px 0 38px; border-radius: 0 0 6px 6px; }
-.subtopic-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  cursor: pointer;
-  user-select: none;
-  transition: background var(--transition);
-  border-radius: 6px;
-}
-.subtopic-header:hover { background: var(--surface2); }
-.subtopic-title {
-  font-size: 12px;
-  font-weight: 600;
-  flex: 1;
-  color: var(--text2);
-}
-.subtopic-toggle { font-size: 10px; color: var(--text3); transition: transform 0.2s; }
-.subtopic-toggle.open { transform: rotate(180deg); }
-.subtopic-body.collapsed { display: none; }
-
-/* TABLE */
-.chapter-table-wrap {
-  overflow-x: auto;
-  margin: 4px 0 10px 0;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-}
-.chapter-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 540px;
-}
-.chapter-table thead {
-  position: sticky;
-  top: 52px;
-  z-index: 10;
-  background: var(--surface2);
-}
-.chapter-table th {
-  padding: 7px 10px;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--text3);
-  text-align: center;
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
-}
-.chapter-table th:first-child { text-align: left; }
-.chapter-table td {
-  padding: 7px 10px;
-  font-size: 12px;
-  border-bottom: 1px solid var(--border);
-  vertical-align: middle;
-}
-.chapter-table tr:last-child td { border-bottom: none; }
-.chapter-table td:first-child { font-weight: 500; color: var(--text); min-width: 140px; }
-.chapter-table td { text-align: center; }
-.chapter-table td:first-child { text-align: left; }
-
-/* Row states */
-.chapter-row { transition: background 0.25s; }
-.chapter-row.completed { background: var(--green-bg); }
-.chapter-row.inprogress { background: var(--yellow-bg); }
-.chapter-row.notstarted { background: var(--surface); }
-.chapter-row.hidden-row { display: none; }
-
-/* Status dot */
-.status-dot { margin-right: 6px; font-size: 10px; }
-
-/* Checkbox */
-.cb-wrap { display: flex; justify-content: center; align-items: center; }
-input[type="checkbox"] {
-  width: 16px; height: 16px;
-  accent-color: var(--accent);
-  cursor: pointer;
-  border-radius: 3px;
 }
 
-/* Chapter name cell */
-.ch-name { display: flex; align-items: center; gap: 4px; }
-
-/* ===== MODAL ===== */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.4);
-  backdrop-filter: blur(4px);
-  z-index: 200;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+function renderStreakUI() {
+const cs = document.getElementById(“currentStreak”);
+const ls = document.getElementById(“longestStreak”);
+const w  = document.getElementById(“streakWarn”);
+if (cs) cs.textContent = state.streak.currentStreak;
+if (ls) ls.textContent = state.streak.longestStreak;
+if (!w) return;
+const last = state.streak.lastActiveDate;
+if (state.streak.currentStreak > 0 && last === todayStr()) {
+w.textContent = “✅ Studied today!”;
+} else if (state.streak.currentStreak > 0) {
+w.textContent = “⚠️ Don’t break the streak!”;
+} else {
+w.textContent = “”;
 }
-.modal-overlay.open { display: flex; }
-.modal-box {
-  background: var(--surface);
-  border-radius: 16px;
-  padding: 28px;
-  max-width: 720px;
-  width: 100%;
-  max-height: 85vh;
-  overflow-y: auto;
-  position: relative;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.18);
-}
-.modal-close {
-  position: absolute;
-  top: 16px; right: 18px;
-  background: none;
-  border: none;
-  font-size: 22px;
-  cursor: pointer;
-  color: var(--text3);
-}
-.modal-close:hover { color: var(--text); }
-.modal-title {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 700;
-  margin-bottom: 20px;
 }
 
-/* Analytics */
-.analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
-.ana-card {
-  background: var(--surface2);
-  border-radius: 10px;
-  padding: 14px;
-}
-.ana-card-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); font-weight: 600; }
-.ana-card-val { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--text); }
-.ana-card-sub { font-size: 12px; color: var(--text2); }
-
-.ana-section-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text);
-  margin: 16px 0 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-.ana-bar-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 7px;
-}
-.ana-bar-label { font-size: 12px; color: var(--text2); width: 140px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ana-bar-track {
-  flex: 1;
-  height: 8px;
-  background: var(--surface2);
-  border-radius: 20px;
-  overflow: hidden;
-}
-.ana-bar-fill {
-  height: 100%;
-  border-radius: 20px;
-  background: var(--accent);
-  transition: width 0.5s ease;
-}
-.ana-bar-pct { font-family: var(--font-mono); font-size: 11px; color: var(--text3); width: 34px; text-align: right; }
-
-/* Weak areas */
-.weak-list { display: flex; flex-wrap: wrap; gap: 6px; }
-.weak-tag {
-  background: var(--red-bg);
-  color: var(--red);
-  border-radius: 20px;
-  padding: 4px 11px;
-  font-size: 11px;
-  font-weight: 600;
+/* ─── 8. ANTI-CHEAT ─── */
+function showAlert(msg, danger = true) {
+const bar = document.getElementById(“alertBar”);
+if (!bar) return;
+bar.textContent = msg;
+bar.className   = “alert-bar visible” + (danger ? “ danger” : “”);
+clearTimeout(bar._t);
+bar._t = setTimeout(() => { bar.className = “alert-bar”; }, 5000);
 }
 
-/* ===== SCROLLBAR ===== */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+function isBurst() {
+const now = Date.now();
+recentActions = recentActions.filter(t => now - t < BURST_WINDOW);
+return recentActions.length >= BURST_LIMIT;
+}
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
-  .sidebar { transform: translateX(-100%); }
-  .sidebar.mobile-open { transform: translateX(0); }
-  .main { margin-left: 0; }
-  .analytics-grid { grid-template-columns: 1fr; }
-  .filter-chips { display: none; }
-  .topbar { flex-wrap: wrap; }
-  .search-wrap { max-width: 100%; }
+/* ─── 9. CHECKBOX CHANGE HANDLER ─── */
+function handleCheckboxChange(cb) {
+const id = cb.dataset.cbid;
+if (!id) return;
+
+if (cb.checked) {
+recentActions.push(Date.now());
+
+```
+if (isBurst()) {
+  showAlert("🚨 Suspicious activity detected — progress not counted", true);
+  cb.checked       = false;
+  state.checks[id] = false;
+  saveState();
+  updateAllProgress();
+  return;
 }
-@media (min-width: 769px) {
-  .sidebar.hidden { transform: translateX(-100%); }
-  .main.full { margin-left: 0; }
+
+state.checks[id] = true;
+saveState();
+updateAllProgress();
+
+// Hold-time validation for streak
+const snap = Date.now();
+pendingChecks[id] = snap;
+setTimeout(() => {
+  if (pendingChecks[id] === snap && state.checks[id]) {
+    delete pendingChecks[id];
+    // Only meaningful columns increment streak
+    if (id.includes("__Problems__") || id.includes("__PYQs__") || id.includes("__Notes__")) {
+      recordValidActivity();
+    }
+  }
+}, MIN_HOLD_MS);
+```
+
+} else {
+delete pendingChecks[id];
+state.checks[id] = false;
+saveState();
+updateAllProgress();
 }
+}
+
+/* Single delegated listener — works for ALL checkboxes regardless of when they’re added */
+document.addEventListener(“change”, (e) => {
+if (e.target.type === “checkbox” && e.target.dataset.cbid) {
+handleCheckboxChange(e.target);
+}
+});
+
+/* ─── 10. BUILD DOM ─── */
+function render() {
+const root = document.getElementById(“roadmapRoot”);
+if (!root) return;
+root.innerHTML = “”;
+ROADMAP.forEach(phase => root.appendChild(buildPhaseBlock(phase)));
+updateAllProgress();
+buildNavPhases();
+}
+
+/* ––––– Phase ––––– */
+function buildPhaseBlock(phase) {
+// Default: open (false = not collapsed)
+const collapsed = state.collapsePhase[phase.id] === true;
+
+const block = document.createElement(“div”);
+block.className = “phase-block”;
+block.id = “phase_” + phase.id;
+
+// Progress bar strip
+const barWrap = document.createElement(“div”);
+barWrap.className = “phase-progress-bar-wrap”;
+const bar = document.createElement(“div”);
+bar.className = “phase-progress-bar”;
+bar.id = “phasebar_” + phase.id;
+bar.style.background = phase.color;
+bar.style.width = “0%”;
+barWrap.appendChild(bar);
+
+// Header
+const hdr = document.createElement(“div”);
+hdr.className = “phase-header”;
+
+const dot = document.createElement(“div”);
+dot.className = “phase-color-dot”;
+dot.style.background = phase.color;
+
+const titleEl = document.createElement(“div”);
+titleEl.className = “phase-title”;
+titleEl.id = “phasetitle_” + phase.id;
+titleEl.textContent = phase.title;
+
+const badge = document.createElement(“span”);
+badge.className = “phase-badge”;
+badge.id = “phasebadge_” + phase.id;
+badge.textContent = “0%”;
+
+const tog = document.createElement(“span”);
+tog.className = “phase-toggle” + (collapsed ? “” : “ open”);
+tog.id = “phasetoggle_” + phase.id;
+tog.textContent = “▼”;
+
+hdr.appendChild(dot);
+hdr.appendChild(titleEl);
+hdr.appendChild(badge);
+hdr.appendChild(tog);
+hdr.addEventListener(“click”, () => togglePhase(phase.id));
+
+// Body
+const body = document.createElement(“div”);
+body.className = “phase-body” + (collapsed ? “ collapsed” : “”);
+body.id = “phasebody_” + phase.id;
+
+phase.topics.forEach(topic => body.appendChild(buildTopicBlock(phase, topic)));
+
+block.appendChild(barWrap);
+block.appendChild(hdr);
+block.appendChild(body);
+return block;
+}
+
+/* ––––– Topic ––––– */
+function buildTopicBlock(phase, topic) {
+const collapsed = state.collapseTopic[topic.id] === true;
+
+const block = document.createElement(“div”);
+block.className = “topic-block”;
+block.id = “topic_” + topic.id;
+
+const hdr = document.createElement(“div”);
+hdr.className = “topic-header”;
+
+const numEl = document.createElement(“span”);
+numEl.className = “topic-number”;
+numEl.textContent = topic.number + “.”;
+
+const ttl = document.createElement(“span”);
+ttl.className = “topic-title”;
+ttl.textContent = topic.title;
+
+const meta = document.createElement(“span”);
+meta.className = “topic-meta”;
+meta.textContent = topic.meta;
+
+const pctEl = document.createElement(“span”);
+pctEl.className = “topic-pct”;
+pctEl.id = “topicpct_” + topic.id;
+pctEl.textContent = “0%”;
+
+const tog = document.createElement(“span”);
+tog.className = “topic-toggle” + (collapsed ? “” : “ open”);
+tog.id = “topictoggle_” + topic.id;
+tog.textContent = “▼”;
+
+hdr.appendChild(numEl);
+hdr.appendChild(ttl);
+hdr.appendChild(meta);
+hdr.appendChild(pctEl);
+hdr.appendChild(tog);
+hdr.addEventListener(“click”, () => toggleTopic(topic.id));
+
+const body = document.createElement(“div”);
+body.className = “topic-body” + (collapsed ? “ collapsed” : “”);
+body.id = “topicbody_” + topic.id;
+
+topic.subtopics.forEach(sub => body.appendChild(buildSubtopicBlock(phase, topic, sub)));
+
+block.appendChild(hdr);
+block.appendChild(body);
+return block;
+}
+
+/* ––––– Subtopic ––––– */
+function buildSubtopicBlock(phase, topic, sub) {
+const collapsed = state.collapseSubtopic[sub.id] === true;
+
+const block = document.createElement(“div”);
+block.className = “subtopic-block”;
+block.id = “subtopic_” + sub.id;
+
+const hdr = document.createElement(“div”);
+hdr.className = “subtopic-header”;
+
+const ttl = document.createElement(“span”);
+ttl.className = “subtopic-title”;
+ttl.textContent = “📂 “ + sub.title;
+
+const tog = document.createElement(“span”);
+tog.className = “subtopic-toggle” + (collapsed ? “” : “ open”);
+tog.id = “subtopictoggle_” + sub.id;
+tog.textContent = “▼”;
+
+hdr.appendChild(ttl);
+hdr.appendChild(tog);
+hdr.addEventListener(“click”, () => toggleSubtopic(sub.id));
+
+const body = document.createElement(“div”);
+body.className = “subtopic-body” + (collapsed ? “ collapsed” : “”);
+body.id = “subtopicbody_” + sub.id;
+
+// Build and append table immediately (synchronous — no setTimeout)
+body.appendChild(buildChapterTable(phase, topic, sub));
+
+block.appendChild(hdr);
+block.appendChild(body);
+return block;
+}
+
+/* ––––– Chapter Table ––––– */
+function buildChapterTable(phase, topic, sub) {
+const wrap = document.createElement(“div”);
+wrap.className = “chapter-table-wrap”;
+
+const table = document.createElement(“table”);
+table.className = “chapter-table”;
+
+// colgroup — required so table-layout:fixed distributes columns correctly.
+// Without this, fixed layout splits columns evenly which misaligns ch name.
+const colgroup = document.createElement(“colgroup”);
+const colCh = document.createElement(“col”); // chapter name: flexible
+colgroup.appendChild(colCh);
+COLS.forEach(() => {
+const col = document.createElement(“col”); // each checkbox col: fixed via CSS
+colgroup.appendChild(col);
+});
+table.appendChild(colgroup);
+
+// thead
+const thead = document.createElement(“thead”);
+const hRow  = document.createElement(“tr”);
+
+// First th: Chapter
+const thCh = document.createElement(“th”);
+thCh.textContent = “Chapter”;
+hRow.appendChild(thCh);
+
+COLS.forEach(col => {
+const th = document.createElement(“th”);
+th.textContent = COL_LABELS[col];
+hRow.appendChild(th);
+});
+thead.appendChild(hRow);
+table.appendChild(thead);
+
+// tbody
+const tbody = document.createElement(“tbody”);
+
+sub.chapters.forEach(ch => {
+const slug = slugify(ch);
+const rId  = rowId(phase.id, topic.id, sub.id, slug);
+
+```
+const tr = document.createElement("tr");
+tr.className       = "chapter-row notstarted";
+tr.id              = rId;
+tr.dataset.chapter = ch.toLowerCase();
+tr.dataset.phase   = phase.id;
+tr.dataset.topic   = topic.id;
+tr.dataset.sub     = sub.id;
+tr.dataset.slug    = slug;
+
+// Chapter name td
+const nameTd = document.createElement("td");
+
+const statusDot = document.createElement("span");
+statusDot.className  = "status-dot";
+statusDot.id         = "status_" + rId;
+statusDot.textContent = "🔴";
+
+nameTd.appendChild(statusDot);
+nameTd.appendChild(document.createTextNode(ch));
+tr.appendChild(nameTd);
+
+// One td per column with a checkbox
+COLS.forEach(col => {
+  const td    = document.createElement("td");
+  const cbWrap = document.createElement("div");
+  cbWrap.className = "cb-wrap";
+
+  const id = cbId(phase.id, topic.id, sub.id, slug, col);
+
+  const cb = document.createElement("input");
+  cb.type            = "checkbox";
+  cb.id              = id;
+  cb.dataset.cbid    = id;
+  cb.checked         = !!state.checks[id];
+  cb.setAttribute("aria-label", ch + " — " + COL_LABELS[col]);
+
+  cbWrap.appendChild(cb);
+  td.appendChild(cbWrap);
+  tr.appendChild(td);
+});
+
+tbody.appendChild(tr);
+```
+
+});
+
+table.appendChild(tbody);
+wrap.appendChild(table);
+return wrap;
+}
+
+/* ─── 11. COLLAPSE TOGGLES ─── */
+function togglePhase(phaseId) {
+const body = document.getElementById(“phasebody_”   + phaseId);
+const tog  = document.getElementById(“phasetoggle_” + phaseId);
+if (!body || !tog) return;
+const now = body.classList.toggle(“collapsed”);
+tog.classList.toggle(“open”, !now);
+state.collapsePhase[phaseId] = now;
+saveState();
+}
+
+function toggleTopic(topicId) {
+const body = document.getElementById(“topicbody_”   + topicId);
+const tog  = document.getElementById(“topictoggle_” + topicId);
+if (!body || !tog) return;
+const now = body.classList.toggle(“collapsed”);
+tog.classList.toggle(“open”, !now);
+state.collapseTopic[topicId] = now;
+saveState();
+}
+
+function toggleSubtopic(subId) {
+const body = document.getElementById(“subtopicbody_”   + subId);
+const tog  = document.getElementById(“subtopictoggle_” + subId);
+if (!body || !tog) return;
+const now = body.classList.toggle(“collapsed”);
+tog.classList.toggle(“open”, !now);
+state.collapseSubtopic[subId] = now;
+saveState();
+}
+
+/* ─── 12. UPDATE PROGRESS (called after every checkbox change) ─── */
+function updateAllProgress() {
+// Overall ring
+const op   = overallProgress();
+const circ = 2 * Math.PI * 34;
+const ring = document.getElementById(“overallRing”);
+if (ring) {
+ring.style.strokeDasharray  = String(circ);
+ring.style.strokeDashoffset = String(circ - (op.pct / 100) * circ);
+}
+const pctEl = document.getElementById(“overallPct”);
+if (pctEl) pctEl.textContent = op.pct + “%”;
+
+// Phase / topic / chapter
+ROADMAP.forEach(phase => {
+const pp = phaseProgress(phase);
+
+```
+const bar   = document.getElementById("phasebar_"   + phase.id);
+const badge = document.getElementById("phasebadge_" + phase.id);
+const title = document.getElementById("phasetitle_" + phase.id);
+if (bar)   bar.style.width   = pp.pct + "%";
+if (badge) badge.textContent = pp.pct + "%";
+if (title) {
+  const base = phase.title.replace(" ✅", "");
+  title.textContent = (pp.pct === 100) ? base + " ✅" : base;
+}
+
+phase.topics.forEach(topic => {
+  const tp    = topicProgress(phase, topic);
+  const tpEl  = document.getElementById("topicpct_" + topic.id);
+  if (tpEl) tpEl.textContent = tp.pct + "%";
+
+  topic.subtopics.forEach(sub => {
+    sub.chapters.forEach(ch => {
+      const slug = slugify(ch);
+      const rId  = rowId(phase.id, topic.id, sub.id, slug);
+      const row  = document.getElementById(rId);
+      const dot  = document.getElementById("status_" + rId);
+      if (!row) return;
+
+      const st = chapterStatus(phase.id, topic.id, sub.id, ch);
+      // Preserve hidden-row if present
+      const hidden = row.classList.contains("hidden-row") ? " hidden-row" : "";
+      row.className = "chapter-row " + st + hidden;
+      if (dot) dot.textContent = st === "completed" ? "🟢" : st === "inprogress" ? "🟡" : "🔴";
+    });
+  });
+});
+```
+
+});
+
+buildNavPhases();
+updateOnTrack();
+applyFilters();
+}
+
+/* ─── 13. NAV PHASES ─── */
+function buildNavPhases() {
+const nav = document.getElementById(“navPhases”);
+if (!nav) return;
+nav.innerHTML = “”;
+
+ROADMAP.forEach((phase, i) => {
+const pp  = phaseProgress(phase);
+const btn = document.createElement(“button”);
+btn.className = “nav-phase-btn”;
+
+```
+let short = phase.title
+  .replace(/^Phase (\d+):\s*/, "Ph$1 ")
+  .replace("General Aptitude", "GA")
+  .split("(")[0].trim();
+if (short.length > 28) short = short.slice(0, 28) + "…";
+
+const lbl = document.createElement("span");
+lbl.textContent = short;
+
+const pctSpan = document.createElement("span");
+pctSpan.className = "nav-phase-pct";
+pctSpan.textContent = pp.pct + "%";
+
+btn.appendChild(lbl);
+btn.appendChild(pctSpan);
+btn.addEventListener("click", () => {
+  document.getElementById("phase_" + phase.id)
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+nav.appendChild(btn);
+```
+
+});
+}
+
+/* ─── 14. SEARCH ─── */
+function initSearch() {
+const input = document.getElementById(“searchInput”);
+const clear = document.getElementById(“searchClear”);
+if (!input) return;
+input.addEventListener(“input”, () => {
+if (clear) clear.classList.toggle(“visible”, input.value.length > 0);
+applyFilters();
+});
+}
+
+function clearSearch() {
+const input = document.getElementById(“searchInput”);
+const clear = document.getElementById(“searchClear”);
+if (input) input.value = “”;
+if (clear) clear.classList.remove(“visible”);
+applyFilters();
+}
+
+/* ─── 15. FILTERS ─── */
+const activeFilters = { incomplete: false, revision: false };
+
+function toggleFilter(type) {
+activeFilters[type] = !activeFilters[type];
+const key = type.charAt(0).toUpperCase() + type.slice(1);
+document.getElementById(“chip” + key)?.classList.toggle(“active”, activeFilters[type]);
+applyFilters();
+}
+
+function applyFilters() {
+const q            = (document.getElementById(“searchInput”)?.value || “”).toLowerCase().trim();
+const onlyIncomp   = activeFilters.incomplete;
+const onlyRevPend  = activeFilters.revision;
+
+document.querySelectorAll(”.chapter-row”).forEach(row => {
+const chName  = row.dataset.chapter || “”;
+const phaseId = row.dataset.phase;
+const topicId = row.dataset.topic;
+const subId   = row.dataset.sub;
+const slug    = row.dataset.slug;
+
+```
+let visible = true;
+
+if (q && !chName.includes(q)) visible = false;
+
+if (visible && onlyIncomp && row.classList.contains("completed")) visible = false;
+
+if (visible && onlyRevPend) {
+  const anyCheck = COLS.some(c => state.checks[cbId(phaseId, topicId, subId, slug, c)]);
+  const rev1Done = state.checks[cbId(phaseId, topicId, subId, slug, "Rev1")];
+  const rev2Done = state.checks[cbId(phaseId, topicId, subId, slug, "Rev2")];
+  if (!anyCheck || (rev1Done && rev2Done)) visible = false;
+}
+
+row.classList.toggle("hidden-row", !visible);
+```
+
+});
+}
+
+/* ─── 16. SIDEBAR ─── */
+function toggleSidebar() {
+const sidebar = document.getElementById(“sidebar”);
+const main    = document.getElementById(“mainContent”);
+if (window.innerWidth <= 768) {
+sidebar.classList.toggle(“mobile-open”);
+} else {
+const hidden = sidebar.classList.toggle(“hidden”);
+main.classList.toggle(“full”, hidden);
+}
+}
+
+/* ─── 17. ON-TRACK ─── */
+function updateOnTrack() {
+const el      = document.getElementById(“onTrackStatus”);
+const dateVal = document.getElementById(“globalTargetDate”)?.value;
+if (!el) return;
+if (!dateVal) { el.textContent = “”; return; }
+
+const daysLeft = Math.ceil((new Date(dateVal) - new Date()) / 86400000);
+const op       = overallProgress();
+
+if (daysLeft <= 0) {
+el.textContent = “⏰ Target date passed!”;
+el.className   = “on-track behind”;
+} else {
+const needed = (100 - op.pct) / daysLeft;
+el.textContent = needed <= 1.5
+? `✅ On track (${daysLeft}d left)`
+: `⚠️ Behind schedule (${daysLeft}d left)`;
+el.className = “on-track “ + (needed <= 1.5 ? “ok” : “behind”);
+}
+}
+
+/* ─── 18. ANALYTICS ─── */
+function openAnalytics() {
+document.getElementById(“analyticsModal”).classList.add(“open”);
+renderAnalytics();
+}
+
+function closeAnalytics(e) {
+if (!e || e.target.id === “analyticsModal”) {
+document.getElementById(“analyticsModal”).classList.remove(“open”);
+}
+}
+
+function renderAnalytics() {
+const op = overallProgress();
+let revTotal = 0, revDone = 0;
+
+ROADMAP.forEach(phase =>
+phase.topics.forEach(topic =>
+topic.subtopics.forEach(sub =>
+sub.chapters.forEach(ch => {
+revTotal++;
+if (state.checks[cbId(phase.id, topic.id, sub.id, slugify(ch), “Rev1”)]) revDone++;
+})
+)
+)
+);
+
+const revPct     = revTotal ? Math.round(revDone / revTotal * 100) : 0;
+const weakTopics = [];
+ROADMAP.forEach(phase =>
+phase.topics.forEach(topic => {
+const tp = topicProgress(phase, topic);
+if (tp.pct < 30 && tp.checked > 0) weakTopics.push({ title: topic.title, pct: tp.pct });
+})
+);
+
+const container = document.getElementById(“analyticsContent”);
+container.innerHTML = “”;
+
+// Summary cards
+const grid = document.createElement(“div”);
+grid.className = “analytics-grid”;
+grid.innerHTML = `<div class="ana-card"> <div class="ana-card-label">Overall Completion</div> <div class="ana-card-val">${op.pct}%</div> <div class="ana-card-sub">${op.checked} / ${op.total} boxes checked</div> </div> <div class="ana-card"> <div class="ana-card-label">Revision Coverage</div> <div class="ana-card-val">${revPct}%</div> <div class="ana-card-sub">${revDone} / ${revTotal} chapters Rev 1</div> </div> <div class="ana-card"> <div class="ana-card-label">Current Streak</div> <div class="ana-card-val">🔥 ${state.streak.currentStreak}</div> <div class="ana-card-sub">Longest: ${state.streak.longestStreak} days</div> </div> <div class="ana-card"> <div class="ana-card-label">Last Active</div> <div class="ana-card-val" style="font-size:18px">${state.streak.lastActiveDate || "—"}</div> <div class="ana-card-sub">Date of last valid study</div> </div>`;
+container.appendChild(grid);
+
+// Phase bars
+addSectionTitle(container, “Phase-wise Progress”);
+ROADMAP.forEach(phase => {
+const pp    = phaseProgress(phase);
+const short = phase.title.replace(/^Phase \d+:\s*/, “”).replace(“General Aptitude”, “GA”).split(”(”)[0].trim();
+addBarRow(container, short, pp.pct, phase.color, phase.title);
+});
+
+// Topic bars
+addSectionTitle(container, “Topic-wise Progress”);
+ROADMAP.forEach(phase =>
+phase.topics.forEach(topic => {
+const tp = topicProgress(phase, topic);
+addBarRow(container, topic.title.split(”(”)[0].trim(), tp.pct, phase.color, topic.title);
+})
+);
+
+// Weak areas
+addSectionTitle(container, “⚠️ Weak Areas (started but < 30%)”);
+const weakList = document.createElement(“div”);
+weakList.className = “weak-list”;
+if (weakTopics.length === 0) {
+weakList.innerHTML = `<span style="color:var(--text3);font-size:13px">No weak areas yet — great start!</span>`;
+} else {
+weakTopics.forEach(({ title, pct }) => {
+const tag = document.createElement(“span”);
+tag.className   = “weak-tag”;
+tag.textContent = title.split(”(”)[0].trim() + “ (” + pct + “%)”;
+weakList.appendChild(tag);
+});
+}
+container.appendChild(weakList);
+}
+
+function addSectionTitle(parent, text) {
+const el = document.createElement(“div”);
+el.className   = “ana-section-title”;
+el.textContent = text;
+parent.appendChild(el);
+}
+
+function addBarRow(parent, label, pct, color, fullTitle) {
+const row = document.createElement(“div”);
+row.className = “ana-bar-row”;
+row.innerHTML = `<div class="ana-bar-label" title="${fullTitle || label}">${label}</div> <div class="ana-bar-track"> <div class="ana-bar-fill" style="width:${pct}%;background:${color}"></div> </div> <div class="ana-bar-pct">${pct}%</div>`;
+parent.appendChild(row);
+}
+
+/* ─── 19. INIT ─── */
+document.addEventListener(“DOMContentLoaded”, () => {
+loadState();
+checkStreakBroken();
+render();
+renderStreakUI();
+initSearch();
+
+// Target date
+const dateInput = document.getElementById(“globalTargetDate”);
+if (dateInput) {
+if (state.targetDate) dateInput.value = state.targetDate;
+dateInput.addEventListener(“change”, () => {
+state.targetDate = dateInput.value;
+saveState();
+updateOnTrack();
+});
+}
+
+// Close mobile sidebar on outside tap
+document.addEventListener(“click”, (e) => {
+const sidebar   = document.getElementById(“sidebar”);
+const hamburger = document.getElementById(“hamburger”);
+if (
+sidebar &&
+window.innerWidth <= 768 &&
+sidebar.classList.contains(“mobile-open”) &&
+!sidebar.contains(e.target) &&
+e.target !== hamburger
+) {
+sidebar.classList.remove(“mobile-open”);
+}
+});
+});
