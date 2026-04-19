@@ -11,7 +11,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
-
   <style>
     body { display: flex; min-height: 100vh; margin: 0; font-family: sans-serif; }
     .sidebar {
@@ -27,7 +26,7 @@
       display: block; flex-shrink: 0;
     }
     .phase-block { display: block; }
-    .phase-body  { display: block; }
+    .phase-body { display: block; }
     .phase-body.collapsed { display: none; }
     .topic-body.collapsed { display: none; }
     .subtopic-body.collapsed { display: none; }
@@ -40,73 +39,60 @@
       .main { margin-left: 0; }
     }
   </style>
-
 </head>
 <body>
-
-  <!-- SIDEBAR -->
 
   <nav class="sidebar" id="sidebar">
     <div class="sidebar-brand">
       <span class="brand-icon">⬡</span>
       <span class="brand-text">GATE<em>Track</em></span>
     </div>
-
-```
-<div class="sidebar-section">
-  <div class="streak-card">
-    <div class="streak-row">
-      <span class="streak-label">🔥 Streak</span>
-      <span class="streak-val" id="currentStreak">0</span>
+    <div class="sidebar-section">
+      <div class="streak-card">
+        <div class="streak-row">
+          <span class="streak-label">🔥 Streak</span>
+          <span class="streak-val" id="currentStreak">0</span>
+        </div>
+        <div class="streak-row">
+          <span class="streak-label">🏆 Longest</span>
+          <span class="streak-val" id="longestStreak">0</span>
+        </div>
+        <div class="streak-warn" id="streakWarn"></div>
+      </div>
     </div>
-    <div class="streak-row">
-      <span class="streak-label">🏆 Longest</span>
-      <span class="streak-val" id="longestStreak">0</span>
+    <div class="sidebar-section">
+      <div class="overall-ring-wrap">
+        <svg class="ring-svg"
+             viewBox="0 0 80 80"
+             width="72" height="72"
+             xmlns="http://www.w3.org/2000/svg"
+             style="width:72px;height:72px;max-width:72px;max-height:72px;display:block;flex-shrink:0;transform:rotate(-90deg);overflow:visible;">
+          <circle id="ringBg" cx="40" cy="40" r="34"
+                  fill="none" stroke="#e2ddd5" stroke-width="8"/>
+          <circle id="overallRing" cx="40" cy="40" r="34"
+                  fill="none" stroke="#c84b31" stroke-width="8"
+                  stroke-linecap="round"
+                  stroke-dasharray="213.628"
+                  stroke-dashoffset="213.628"/>
+        </svg>
+        <div class="ring-label">
+          <span id="overallPct">0%</span>
+          <small>Overall</small>
+        </div>
+      </div>
     </div>
-    <div class="streak-warn" id="streakWarn"></div>
-  </div>
-</div>
-
-<div class="sidebar-section">
-  <div class="overall-ring-wrap">
-    <svg class="ring-svg"
-         viewBox="0 0 80 80"
-         width="72" height="72"
-         xmlns="http://www.w3.org/2000/svg"
-         style="width:72px;height:72px;max-width:72px;max-height:72px;display:block;flex-shrink:0;transform:rotate(-90deg);overflow:visible;">
-      <circle id="ringBg" cx="40" cy="40" r="34"
-              fill="none" stroke="#e2ddd5" stroke-width="8"/>
-      <circle id="overallRing" cx="40" cy="40" r="34"
-              fill="none" stroke="#c84b31" stroke-width="8"
-              stroke-linecap="round"
-              stroke-dasharray="213.628"
-              stroke-dashoffset="213.628"/>
-    </svg>
-    <div class="ring-label">
-      <span id="overallPct">0%</span>
-      <small>Overall</small>
+    <div class="sidebar-section nav-phases" id="navPhases"></div>
+    <div class="sidebar-section">
+      <div class="target-section">
+        <label class="section-label">🎯 Target Date</label>
+        <input type="date" id="globalTargetDate" class="date-input" />
+        <div class="on-track" id="onTrackStatus"></div>
+      </div>
     </div>
-  </div>
-</div>
-
-<div class="sidebar-section nav-phases" id="navPhases"></div>
-
-<div class="sidebar-section">
-  <div class="target-section">
-    <label class="section-label">🎯 Target Date</label>
-    <input type="date" id="globalTargetDate" class="date-input" />
-    <div class="on-track" id="onTrackStatus"></div>
-  </div>
-</div>
-
-<div class="sidebar-section">
-  <button class="sidebar-btn" onclick="openAnalytics()">📊 Analytics</button>
-</div>
-```
-
+    <div class="sidebar-section">
+      <button class="sidebar-btn" onclick="openAnalytics()">📊 Analytics</button>
+    </div>
   </nav>
-
-  <!-- MAIN -->
 
   <main class="main" id="mainContent">
     <header class="topbar">
@@ -121,18 +107,9 @@
         <button class="chip" id="chipRevision" onclick="toggleFilter('revision')">Rev Pending</button>
       </div>
     </header>
-
-```
-<div class="alert-bar" id="alertBar"></div>
-
-<div class="roadmap" id="roadmapRoot">
-  <!-- Phases injected by script.js -->
-</div>
-```
-
+    <div class="alert-bar" id="alertBar"></div>
+    <div class="roadmap" id="roadmapRoot"></div>
   </main>
-
-  <!-- ANALYTICS MODAL -->
 
   <div class="modal-overlay" id="analyticsModal" onclick="closeAnalytics(event)">
     <div class="modal-box">
