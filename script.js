@@ -219,7 +219,7 @@ subtopics: [
 /* ─── CONSTANTS ──────────────────────────────────────── */
 const COLS       = [“Video”,“Notes”,“Problems”,“PYQs”,“Rev1”,“Rev2”];
 const COL_LABELS = { Video:“Video”, Notes:“Notes”, Problems:“Problems”, PYQs:“PYQs”, Rev1:“Rev 1”, Rev2:“Rev 2” };
-const LS_KEY     = “gate_tracker_v5”; // bumped — clears any stale state
+const LS_KEY     = “gate_tracker_v5”;
 
 /* ─── STATE ──────────────────────────────────────────── */
 let state = {
@@ -257,89 +257,100 @@ if (s.collapseSubtopic) state.collapseSubtopic = s.collapseSubtopic;
 }
 
 /* ─── ID HELPERS ─────────────────────────────────────── */
+/* FIX: use only alphanumeric + hyphens — no *, no special chars that break HTML IDs */
 function slug(str) {
-return str.toLowerCase().replace(/[^a-z0-9]+/g,”*”).replace(/^*|_$/g,””);
+return str.toLowerCase().replace(/[^a-z0-9]+/g, “-”).replace(/^-+|-+$/g, “”);
 }
 function cbId(pid, tid, sid, chSlug, col) {
-return “cb__”+pid+”**”+tid+”**”+sid+”**”+chSlug+”**”+col;
+return “cb–” + pid + “–” + tid + “–” + sid + “–” + chSlug + “–” + col;
 }
 function rowId(pid, tid, sid, chSlug) {
-return “row__”+pid+”**”+tid+”**”+sid+”__”+chSlug;
+return “row–” + pid + “–” + tid + “–” + sid + “–” + chSlug;
 }
 
 /* ─── PROGRESS ───────────────────────────────────────── */
 function chIDs(pid, tid, sid, ch) {
-return COLS.map(col => cbId(pid, tid, sid, slug(ch), col));
+return COLS.map(function(col) { return cbId(pid, tid, sid, slug(ch), col); });
 }
 function chStatus(pid, tid, sid, ch) {
-const ids = chIDs(pid, tid, sid, ch);
-const n   = ids.filter(id => state.checks[id]).length;
+var ids = chIDs(pid, tid, sid, ch);
+var n   = ids.filter(function(id) { return state.checks[id]; }).length;
 return n === 0 ? “notstarted” : n === ids.length ? “completed” : “inprogress”;
 }
 function topicProg(phase, topic) {
-let total = 0, checked = 0;
-topic.subtopics.forEach(sub =>
-sub.chapters.forEach(ch =>
-chIDs(phase.id, topic.id, sub.id, ch).forEach(id => {
-total++; if (state.checks[id]) checked++;
-})
-)
-);
-return { total, checked, pct: total ? Math.round(checked/total*100) : 0 };
+var total = 0, checked = 0;
+topic.subtopics.forEach(function(sub) {
+sub.chapters.forEach(function(ch) {
+chIDs(phase.id, topic.id, sub.id, ch).forEach(function(id) {
+total++;
+if (state.checks[id]) checked++;
+});
+});
+});
+return { total: total, checked: checked, pct: total ? Math.round(checked / total * 100) : 0 };
 }
 function phaseProg(phase) {
-let total = 0, checked = 0;
-phase.topics.forEach(t => { const p = topicProg(phase,t); total+=p.total; checked+=p.checked; });
-return { total, checked, pct: total ? Math.round(checked/total*100) : 0 };
+var total = 0, checked = 0;
+phase.topics.forEach(function(t) {
+var p = topicProg(phase, t);
+total += p.total;
+checked += p.checked;
+});
+return { total: total, checked: checked, pct: total ? Math.round(checked / total * 100) : 0 };
 }
 function overallProg() {
-let total = 0, checked = 0;
-ROADMAP.forEach(ph => { const p = phaseProg(ph); total+=p.total; checked+=p.checked; });
-return { total, checked, pct: total ? Math.round(checked/total*100) : 0 };
+var total = 0, checked = 0;
+ROADMAP.forEach(function(ph) {
+var p = phaseProg(ph);
+total += p.total;
+checked += p.checked;
+});
+return { total: total, checked: checked, pct: total ? Math.round(checked / total * 100) : 0 };
 }
 
 /* ─── RING UPDATE ────────────────────────────────────── */
 function updateRing(pct) {
-const circ = 2 * Math.PI * 34; // r=34
-const ring = document.getElementById(“overallRing”);
+var circ = 2 * Math.PI * 34; // r=34
+var ring = document.getElementById(“overallRing”);
 if (ring) {
-// setAttribute = SVG presentation API — reliable on all iOS/Safari
 ring.setAttribute(“stroke-dasharray”,  String(circ));
-ring.setAttribute(“stroke-dashoffset”, String(circ - (pct/100)*circ));
+ring.setAttribute(“stroke-dashoffset”, String(circ - (pct / 100) * circ));
 }
-const el = document.getElementById(“overallPct”);
-if (el) el.textContent = pct + “%”;
+var el2 = document.getElementById(“overallPct”);
+if (el2) el2.textContent = pct + “%”;
 }
 
 /* ─── STREAK ─────────────────────────────────────────── */
-function todayStr() { return new Date().toISOString().slice(0,10); }
-function yestStr()  {
-const d = new Date(); d.setDate(d.getDate()-1);
-return d.toISOString().slice(0,10);
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+function yestStr() {
+var d = new Date();
+d.setDate(d.getDate() - 1);
+return d.toISOString().slice(0, 10);
 }
 function recordActivity() {
-const today = todayStr(), last = state.streak.lastActiveDate;
+var today = todayStr(), last = state.streak.lastActiveDate;
 if (last === today) return;
-state.streak.currentStreak = (last === yestStr()) ? state.streak.currentStreak+1 : 1;
+state.streak.currentStreak = (last === yestStr()) ? state.streak.currentStreak + 1 : 1;
 state.streak.lastActiveDate = today;
 state.streak.longestStreak = Math.max(state.streak.longestStreak, state.streak.currentStreak);
 saveState();
 renderStreakUI();
 }
 function checkStreakBroken() {
-const last = state.streak.lastActiveDate;
+var last = state.streak.lastActiveDate;
 if (last && last !== todayStr() && last !== yestStr()) {
-state.streak.currentStreak = 0; saveState();
+state.streak.currentStreak = 0;
+saveState();
 }
 }
 function renderStreakUI() {
-const cs = document.getElementById(“currentStreak”);
-const ls = document.getElementById(“longestStreak”);
-const w  = document.getElementById(“streakWarn”);
+var cs = document.getElementById(“currentStreak”);
+var ls = document.getElementById(“longestStreak”);
+var w  = document.getElementById(“streakWarn”);
 if (cs) cs.textContent = state.streak.currentStreak;
 if (ls) ls.textContent = state.streak.longestStreak;
 if (!w) return;
-const last = state.streak.lastActiveDate;
+var last = state.streak.lastActiveDate;
 w.textContent = state.streak.currentStreak > 0
 ? (last === todayStr() ? “✅ Studied today!” : “⚠️ Don’t break the streak!”)
 : “”;
@@ -347,25 +358,24 @@ w.textContent = state.streak.currentStreak > 0
 
 /* ─── ANTI-CHEAT ─────────────────────────────────────── */
 function showAlert(msg, danger) {
-const bar = document.getElementById(“alertBar”);
+var bar = document.getElementById(“alertBar”);
 if (!bar) return;
 bar.textContent = msg;
 bar.className = “alert-bar visible” + (danger ? “ danger” : “”);
 clearTimeout(bar._t);
-bar._t = setTimeout(() => { bar.className = “alert-bar”; }, 5000);
+bar._t = setTimeout(function() { bar.className = “alert-bar”; }, 5000);
 }
 function isBurst() {
-const now = Date.now();
-recentActions = recentActions.filter(t => now-t < BURST_WINDOW);
+var now = Date.now();
+recentActions = recentActions.filter(function(t) { return now - t < BURST_WINDOW; });
 return recentActions.length >= BURST_LIMIT;
 }
 
 /* ─── CHECKBOX HANDLER ───────────────────────────────── */
-// Single delegated listener — works for all dynamically created checkboxes
 document.addEventListener(“change”, function(e) {
-const cb = e.target;
+var cb = e.target;
 if (cb.type !== “checkbox” || !cb.dataset.cbid) return;
-const id = cb.dataset.cbid;
+var id = cb.dataset.cbid;
 
 if (cb.checked) {
 recentActions.push(Date.now());
@@ -373,19 +383,21 @@ if (isBurst()) {
 showAlert(“🚨 Suspicious activity detected — progress not counted”, true);
 cb.checked = false;
 state.checks[id] = false;
-saveState(); updateAllProgress(); return;
+saveState();
+updateAllProgress();
+return;
 }
 state.checks[id] = true;
-saveState(); updateAllProgress();
+saveState();
+updateAllProgress();
 
 ```
-const snap = Date.now();
+var snap = Date.now();
 pendingChecks[id] = snap;
 setTimeout(function() {
   if (pendingChecks[id] === snap && state.checks[id]) {
     delete pendingChecks[id];
-    // Only meaningful columns count for streak
-    if (id.indexOf("__Problems__") > -1 || id.indexOf("__PYQs__") > -1 || id.indexOf("__Notes__") > -1) {
+    if (id.indexOf("--Problems--") > -1 || id.indexOf("--PYQs--") > -1 || id.indexOf("--Notes--") > -1) {
       recordActivity();
     }
   }
@@ -395,14 +407,15 @@ setTimeout(function() {
 } else {
 delete pendingChecks[id];
 state.checks[id] = false;
-saveState(); updateAllProgress();
+saveState();
+updateAllProgress();
 }
 });
 
 /* ─── DOM BUILDERS ───────────────────────────────────── */
 function render() {
 try {
-const root = document.getElementById(“roadmapRoot”);
+var root = document.getElementById(“roadmapRoot”);
 if (!root) { console.error(“roadmapRoot not found”); return; }
 root.innerHTML = “”;
 ROADMAP.forEach(function(phase) {
@@ -412,99 +425,120 @@ updateAllProgress();
 buildNavPhases();
 } catch(err) {
 console.error(“render() failed:”, err);
-const root = document.getElementById(“roadmapRoot”);
-if (root) root.innerHTML = ’<div style="padding:20px;color:red">Render error: ’ + err.message + ‘</div>’;
+var root2 = document.getElementById(“roadmapRoot”);
+if (root2) root2.innerHTML = ’<div style="padding:20px;color:red">Render error: ’ + err.message + ‘</div>’;
 }
 }
 
 function buildPhase(phase) {
-const collapsed = state.collapsePhase[phase.id] === true;
-
-const block = el(“div”, “phase-block”, “phase_”+phase.id);
+var collapsed = state.collapsePhase[phase.id] === true;
+var block = mkEl(“div”, “phase-block”, “phase_” + phase.id);
 
 // progress bar
-const bw = el(“div”,“phase-progress-bar-wrap”);
-const b  = el(“div”,“phase-progress-bar”,“phasebar_”+phase.id);
-b.style.background = phase.color; b.style.width = “0%”;
-bw.appendChild(b); block.appendChild(bw);
+var bw = mkEl(“div”, “phase-progress-bar-wrap”);
+var b  = mkEl(“div”, “phase-progress-bar”, “phasebar_” + phase.id);
+b.style.background = phase.color;
+b.style.width = “0%”;
+bw.appendChild(b);
+block.appendChild(bw);
 
 // header
-const hdr = el(“div”,“phase-header”);
-const dot = el(“div”,“phase-color-dot”); dot.style.background = phase.color;
-const ttl = el(“div”,“phase-title”,“phasetitle_”+phase.id); ttl.textContent = phase.title;
-const bdg = el(“span”,“phase-badge”,“phasebadge_”+phase.id); bdg.textContent = “0%”;
-const tog = el(“span”,“phase-toggle”+(collapsed?”” :” open”),“phasetoggle_”+phase.id);
+var hdr = mkEl(“div”, “phase-header”);
+var dot = mkEl(“div”, “phase-color-dot”);
+dot.style.background = phase.color;
+var ttl = mkEl(“div”, “phase-title”, “phasetitle_” + phase.id);
+ttl.textContent = phase.title;
+var bdg = mkEl(“span”, “phase-badge”, “phasebadge_” + phase.id);
+bdg.textContent = “0%”;
+var tog = mkEl(“span”, “phase-toggle” + (collapsed ? “” : “ open”), “phasetoggle_” + phase.id);
 tog.textContent = “▼”;
-hdr.appendChild(dot); hdr.appendChild(ttl); hdr.appendChild(bdg); hdr.appendChild(tog);
-hdr.addEventListener(“click”, function(){ togglePhase(phase.id); });
+hdr.appendChild(dot);
+hdr.appendChild(ttl);
+hdr.appendChild(bdg);
+hdr.appendChild(tog);
+hdr.addEventListener(“click”, function() { togglePhase(phase.id); });
 block.appendChild(hdr);
 
 // body
-const body = el(“div”,“phase-body”+(collapsed?” collapsed”:””),“phasebody_”+phase.id);
-phase.topics.forEach(function(topic){ body.appendChild(buildTopic(phase,topic)); });
+var body = mkEl(“div”, “phase-body” + (collapsed ? “ collapsed” : “”), “phasebody_” + phase.id);
+phase.topics.forEach(function(topic) { body.appendChild(buildTopic(phase, topic)); });
 block.appendChild(body);
 return block;
 }
 
 function buildTopic(phase, topic) {
-const collapsed = state.collapseTopic[topic.id] === true;
-const block = el(“div”,“topic-block”,“topic_”+topic.id);
+var collapsed = state.collapseTopic[topic.id] === true;
+var block = mkEl(“div”, “topic-block”, “topic_” + topic.id);
 
-const hdr = el(“div”,“topic-header”);
-const num = el(“span”,“topic-number”); num.textContent = topic.number+”.”;
-const ttl = el(“span”,“topic-title”); ttl.textContent = topic.title;
-const meta= el(“span”,“topic-meta”); meta.textContent = topic.meta;
-const pct = el(“span”,“topic-pct”,“topicpct_”+topic.id); pct.textContent = “0%”;
-const tog = el(“span”,“topic-toggle”+(collapsed?””:” open”),“topictoggle_”+topic.id);
+var hdr  = mkEl(“div”, “topic-header”);
+var num  = mkEl(“span”, “topic-number”);
+num.textContent = topic.number + “.”;
+var ttl  = mkEl(“span”, “topic-title”);
+ttl.textContent = topic.title;
+var meta = mkEl(“span”, “topic-meta”);
+meta.textContent = topic.meta;
+var pct  = mkEl(“span”, “topic-pct”, “topicpct_” + topic.id);
+pct.textContent = “0%”;
+var tog  = mkEl(“span”, “topic-toggle” + (collapsed ? “” : “ open”), “topictoggle_” + topic.id);
 tog.textContent = “▼”;
-hdr.appendChild(num); hdr.appendChild(ttl); hdr.appendChild(meta);
-hdr.appendChild(pct); hdr.appendChild(tog);
-hdr.addEventListener(“click”, function(){ toggleTopic(topic.id); });
+hdr.appendChild(num);
+hdr.appendChild(ttl);
+hdr.appendChild(meta);
+hdr.appendChild(pct);
+hdr.appendChild(tog);
+hdr.addEventListener(“click”, function() { toggleTopic(topic.id); });
 block.appendChild(hdr);
 
-const body = el(“div”,“topic-body”+(collapsed?” collapsed”:””),“topicbody_”+topic.id);
-topic.subtopics.forEach(function(sub){ body.appendChild(buildSub(phase,topic,sub)); });
+var body = mkEl(“div”, “topic-body” + (collapsed ? “ collapsed” : “”), “topicbody_” + topic.id);
+topic.subtopics.forEach(function(sub) { body.appendChild(buildSub(phase, topic, sub)); });
 block.appendChild(body);
 return block;
 }
 
 function buildSub(phase, topic, sub) {
-const collapsed = state.collapseSubtopic[sub.id] === true;
-const block = el(“div”,“subtopic-block”,“subtopic_”+sub.id);
+var collapsed = state.collapseSubtopic[sub.id] === true;
+var block = mkEl(“div”, “subtopic-block”, “subtopic_” + sub.id);
 
-const hdr = el(“div”,“subtopic-header”);
-const ttl = el(“span”,“subtopic-title”); ttl.textContent = “📂 “+sub.title;
-const tog = el(“span”,“subtopic-toggle”+(collapsed?””:” open”),“subtopictoggle_”+sub.id);
+var hdr = mkEl(“div”, “subtopic-header”);
+var ttl = mkEl(“span”, “subtopic-title”);
+ttl.textContent = “📂 “ + sub.title;
+var tog = mkEl(“span”, “subtopic-toggle” + (collapsed ? “” : “ open”), “subtopictoggle_” + sub.id);
 tog.textContent = “▼”;
-hdr.appendChild(ttl); hdr.appendChild(tog);
-hdr.addEventListener(“click”, function(){ toggleSub(sub.id); });
+hdr.appendChild(ttl);
+hdr.appendChild(tog);
+hdr.addEventListener(“click”, function() { toggleSub(sub.id); });
 block.appendChild(hdr);
 
-const body = el(“div”,“subtopic-body”+(collapsed?” collapsed”:””),“subtopicbody_”+sub.id);
+var body = mkEl(“div”, “subtopic-body” + (collapsed ? “ collapsed” : “”), “subtopicbody_” + sub.id);
 body.appendChild(buildTable(phase, topic, sub));
 block.appendChild(body);
 return block;
 }
 
 function buildTable(phase, topic, sub) {
-const wrap  = el(“div”,“chapter-table-wrap”);
-const table = el(“table”,“chapter-table”);
+var wrap  = mkEl(“div”, “chapter-table-wrap”);
+var table = mkEl(“table”, “chapter-table”);
 
 // thead
-const thead = document.createElement(“thead”);
-const hrow  = document.createElement(“tr”);
-var thCh = document.createElement(“th”); thCh.textContent = “Chapter”; hrow.appendChild(thCh);
-COLS.forEach(function(col){
-var th = document.createElement(“th”); th.textContent = COL_LABELS[col]; hrow.appendChild(th);
+var thead = document.createElement(“thead”);
+var hrow  = document.createElement(“tr”);
+var thCh  = document.createElement(“th”);
+thCh.textContent = “Chapter”;
+hrow.appendChild(thCh);
+COLS.forEach(function(col) {
+var th = document.createElement(“th”);
+th.textContent = COL_LABELS[col];
+hrow.appendChild(th);
 });
-thead.appendChild(hrow); table.appendChild(thead);
+thead.appendChild(hrow);
+table.appendChild(thead);
 
 // tbody
-const tbody = document.createElement(“tbody”);
+var tbody = document.createElement(“tbody”);
 sub.chapters.forEach(function(ch) {
-const sl  = slug(ch);
-const rid = rowId(phase.id, topic.id, sub.id, sl);
-const tr  = el(“tr”,“chapter-row notstarted”,rid);
+var sl  = slug(ch);
+var rid = rowId(phase.id, topic.id, sub.id, sl);
+var tr  = mkEl(“tr”, “chapter-row notstarted”, rid);
 tr.dataset.chapter = ch.toLowerCase();
 tr.dataset.phase   = phase.id;
 tr.dataset.topic   = topic.id;
@@ -513,23 +547,29 @@ tr.dataset.slug    = sl;
 
 ```
 // Chapter name cell
-const nameTd = document.createElement("td");
-const dot    = el("span","status-dot","status_"+rid); dot.textContent = "🔴";
+var nameTd = document.createElement("td");
+var dot    = mkEl("span", "status-dot", "status_" + rid);
+dot.textContent = "🔴";
 nameTd.appendChild(dot);
 nameTd.appendChild(document.createTextNode(ch));
 tr.appendChild(nameTd);
 
 // Checkbox cells
 COLS.forEach(function(col) {
-  var td   = document.createElement("td");
-  var wrap2= document.createElement("div"); wrap2.className = "cb-wrap";
-  var id   = cbId(phase.id, topic.id, sub.id, sl, col);
-  var cb   = document.createElement("input");
-  cb.type = "checkbox"; cb.id = id;
-  cb.dataset.cbid = id;
-  cb.checked = !!state.checks[id];
-  wrap2.appendChild(cb); td.appendChild(wrap2); tr.appendChild(td);
+  var td    = document.createElement("td");
+  var wrap2 = document.createElement("div");
+  wrap2.className = "cb-wrap";
+  var cbEl  = document.createElement("input");
+  var cbid  = cbId(phase.id, topic.id, sub.id, sl, col);
+  cbEl.type = "checkbox";
+  cbEl.id   = cbid;
+  cbEl.dataset.cbid = cbid;
+  cbEl.checked = !!state.checks[cbid];
+  wrap2.appendChild(cbEl);
+  td.appendChild(wrap2);
+  tr.appendChild(td);
 });
+
 tbody.appendChild(tr);
 ```
 
@@ -541,7 +581,7 @@ return wrap;
 }
 
 /* helper: create element with class and optional id */
-function el(tag, className, id) {
+function mkEl(tag, className, id) {
 var e = document.createElement(tag);
 if (className) e.className = className;
 if (id) e.id = id;
@@ -550,28 +590,31 @@ return e;
 
 /* ─── COLLAPSE ───────────────────────────────────────── */
 function togglePhase(pid) {
-var body = document.getElementById(“phasebody_”+pid);
-var tog  = document.getElementById(“phasetoggle_”+pid);
-if (!body||!tog) return;
+var body = document.getElementById(“phasebody_” + pid);
+var tog  = document.getElementById(“phasetoggle_” + pid);
+if (!body || !tog) return;
 var c = body.classList.toggle(“collapsed”);
-tog.classList.toggle(“open”,!c);
-state.collapsePhase[pid] = c; saveState();
+tog.classList.toggle(“open”, !c);
+state.collapsePhase[pid] = c;
+saveState();
 }
 function toggleTopic(tid) {
-var body = document.getElementById(“topicbody_”+tid);
-var tog  = document.getElementById(“topictoggle_”+tid);
-if (!body||!tog) return;
+var body = document.getElementById(“topicbody_” + tid);
+var tog  = document.getElementById(“topictoggle_” + tid);
+if (!body || !tog) return;
 var c = body.classList.toggle(“collapsed”);
-tog.classList.toggle(“open”,!c);
-state.collapseTopic[tid] = c; saveState();
+tog.classList.toggle(“open”, !c);
+state.collapseTopic[tid] = c;
+saveState();
 }
 function toggleSub(sid) {
-var body = document.getElementById(“subtopicbody_”+sid);
-var tog  = document.getElementById(“subtopictoggle_”+sid);
-if (!body||!tog) return;
+var body = document.getElementById(“subtopicbody_” + sid);
+var tog  = document.getElementById(“subtopictoggle_” + sid);
+if (!body || !tog) return;
 var c = body.classList.toggle(“collapsed”);
-tog.classList.toggle(“open”,!c);
-state.collapseSubtopic[sid] = c; saveState();
+tog.classList.toggle(“open”, !c);
+state.collapseSubtopic[sid] = c;
+saveState();
 }
 
 /* ─── PROGRESS UPDATE ────────────────────────────────── */
@@ -581,30 +624,30 @@ updateRing(op.pct);
 
 ROADMAP.forEach(function(phase) {
 var pp  = phaseProg(phase);
-var bar = document.getElementById(“phasebar_”+phase.id);
-var bdg = document.getElementById(“phasebadge_”+phase.id);
-var ttl = document.getElementById(“phasetitle_”+phase.id);
-if (bar) bar.style.width   = pp.pct+”%”;
-if (bdg) bdg.textContent   = pp.pct+”%”;
-if (ttl) ttl.textContent   = phase.title.replace(” ✅”,””) + (pp.pct===100?” ✅”:””);
+var bar = document.getElementById(“phasebar_” + phase.id);
+var bdg = document.getElementById(“phasebadge_” + phase.id);
+var ttl = document.getElementById(“phasetitle_” + phase.id);
+if (bar) bar.style.width  = pp.pct + “%”;
+if (bdg) bdg.textContent  = pp.pct + “%”;
+if (ttl) ttl.textContent  = phase.title.replace(” ✅”, “”) + (pp.pct === 100 ? “ ✅” : “”);
 
 ```
 phase.topics.forEach(function(topic) {
-  var tp  = topicProg(phase,topic);
-  var pel = document.getElementById("topicpct_"+topic.id);
-  if (pel) pel.textContent = tp.pct+"%";
+  var tp  = topicProg(phase, topic);
+  var pel = document.getElementById("topicpct_" + topic.id);
+  if (pel) pel.textContent = tp.pct + "%";
 
   topic.subtopics.forEach(function(sub) {
     sub.chapters.forEach(function(ch) {
       var sl  = slug(ch);
-      var rid = rowId(phase.id,topic.id,sub.id,sl);
+      var rid = rowId(phase.id, topic.id, sub.id, sl);
       var row = document.getElementById(rid);
-      var dot = document.getElementById("status_"+rid);
+      var dot = document.getElementById("status_" + rid);
       if (!row) return;
-      var st  = chStatus(phase.id,topic.id,sub.id,ch);
+      var st     = chStatus(phase.id, topic.id, sub.id, ch);
       var hidden = row.classList.contains("hidden-row") ? " hidden-row" : "";
-      row.className = "chapter-row "+st+hidden;
-      if (dot) dot.textContent = st==="completed"?"🟢":st==="inprogress"?"🟡":"🔴";
+      row.className = "chapter-row " + st + hidden;
+      if (dot) dot.textContent = st === "completed" ? "🟢" : st === "inprogress" ? "🟡" : "🔴";
     });
   });
 });
@@ -624,19 +667,24 @@ if (!nav) return;
 nav.innerHTML = “”;
 ROADMAP.forEach(function(phase, i) {
 var pp  = phaseProg(phase);
-var btn = el(“button”,“nav-phase-btn”);
+var btn = mkEl(“button”, “nav-phase-btn”);
 var short = phase.title
-.replace(/^Phase \d+:\s*/,“Ph”+(i+1)+” “)
-.replace(“General Aptitude”,“GA”)
+.replace(/^Phase \d+:\s*/, “Ph” + (i + 1) + “ “)
+.replace(“General Aptitude”, “GA”)
 .split(”(”)[0].trim();
-if (short.length>28) short = short.slice(0,28)+”…”;
-var lbl = document.createElement(“span”); lbl.textContent = short;
-var psp = el(“span”,“nav-phase-pct”); psp.textContent = pp.pct+”%”;
-btn.appendChild(lbl); btn.appendChild(psp);
-(function(pid){ btn.addEventListener(“click”,function(){
-var el2 = document.getElementById(“phase_”+pid);
-if (el2) el2.scrollIntoView({behavior:“smooth”,block:“start”});
-}); })(phase.id);
+if (short.length > 28) short = short.slice(0, 28) + “…”;
+var lbl = document.createElement(“span”);
+lbl.textContent = short;
+var psp = mkEl(“span”, “nav-phase-pct”);
+psp.textContent = pp.pct + “%”;
+btn.appendChild(lbl);
+btn.appendChild(psp);
+(function(pid) {
+btn.addEventListener(“click”, function() {
+var target = document.getElementById(“phase_” + pid);
+if (target) target.scrollIntoView({ behavior: “smooth”, block: “start” });
+});
+})(phase.id);
 nav.appendChild(btn);
 });
 }
@@ -646,15 +694,15 @@ function initSearch() {
 var inp = document.getElementById(“searchInput”);
 var clr = document.getElementById(“searchClear”);
 if (!inp) return;
-inp.addEventListener(“input”, function(){
-if (clr) clr.classList.toggle(“visible”, inp.value.length>0);
+inp.addEventListener(“input”, function() {
+if (clr) clr.classList.toggle(“visible”, inp.value.length > 0);
 applyFilters();
 });
 }
 function clearSearch() {
 var inp = document.getElementById(“searchInput”);
 var clr = document.getElementById(“searchClear”);
-if (inp) inp.value=””;
+if (inp) inp.value = “”;
 if (clr) clr.classList.remove(“visible”);
 applyFilters();
 }
@@ -663,8 +711,8 @@ applyFilters();
 var activeFilters = { incomplete: false, revision: false };
 function toggleFilter(type) {
 activeFilters[type] = !activeFilters[type];
-var key = type.charAt(0).toUpperCase()+type.slice(1);
-var chip = document.getElementById(“chip”+key);
+var key  = type.charAt(0).toUpperCase() + type.slice(1);
+var chip = document.getElementById(“chip” + key);
 if (chip) chip.classList.toggle(“active”, activeFilters[type]);
 applyFilters();
 }
@@ -672,19 +720,21 @@ function applyFilters() {
 var inp = document.getElementById(“searchInput”);
 var q   = inp ? inp.value.toLowerCase().trim() : “”;
 document.querySelectorAll(”.chapter-row”).forEach(function(row) {
-var ch  = row.dataset.chapter||””;
-var pid = row.dataset.phase, tid = row.dataset.topic;
-var sid = row.dataset.sub,   sl  = row.dataset.slug;
+var ch  = row.dataset.chapter || “”;
+var pid = row.dataset.phase;
+var tid = row.dataset.topic;
+var sid = row.dataset.sub;
+var sl  = row.dataset.slug;
 var vis = true;
-if (q && ch.indexOf(q)<0) vis = false;
+if (q && ch.indexOf(q) < 0) vis = false;
 if (vis && activeFilters.incomplete && row.classList.contains(“completed”)) vis = false;
 if (vis && activeFilters.revision) {
-var any = COLS.some(function(c){ return state.checks[cbId(pid,tid,sid,sl,c)]; });
-var r1  = state.checks[cbId(pid,tid,sid,sl,“Rev1”)];
-var r2  = state.checks[cbId(pid,tid,sid,sl,“Rev2”)];
-if (!any || (r1&&r2)) vis = false;
+var any = COLS.some(function(c) { return state.checks[cbId(pid, tid, sid, sl, c)]; });
+var r1  = state.checks[cbId(pid, tid, sid, sl, “Rev1”)];
+var r2  = state.checks[cbId(pid, tid, sid, sl, “Rev2”)];
+if (!any || (r1 && r2)) vis = false;
 }
-row.classList.toggle(“hidden-row”,!vis);
+row.classList.toggle(“hidden-row”, !vis);
 });
 }
 
@@ -692,7 +742,7 @@ row.classList.toggle(“hidden-row”,!vis);
 function toggleSidebar() {
 var sb   = document.getElementById(“sidebar”);
 var main = document.getElementById(“mainContent”);
-if (window.innerWidth<=768) {
+if (window.innerWidth <= 768) {
 sb.classList.toggle(“mobile-open”);
 } else {
 var hidden = sb.classList.toggle(“hidden”);
@@ -702,17 +752,18 @@ if (main) main.classList.toggle(“full”, hidden);
 
 /* ─── ON-TRACK ───────────────────────────────────────── */
 function updateOnTrack() {
-var el2  = document.getElementById(“onTrackStatus”);
-var inp  = document.getElementById(“globalTargetDate”);
-if (!el2||!inp||!inp.value) { if(el2) el2.textContent=””; return; }
-var days = Math.ceil((new Date(inp.value)-new Date())/86400000);
+var el2 = document.getElementById(“onTrackStatus”);
+var inp = document.getElementById(“globalTargetDate”);
+if (!el2 || !inp || !inp.value) { if (el2) el2.textContent = “”; return; }
+var days = Math.ceil((new Date(inp.value) - new Date()) / 86400000);
 var op   = overallProg();
-if (days<=0) {
-el2.textContent=“⏰ Target passed!”; el2.className=“on-track behind”;
+if (days <= 0) {
+el2.textContent = “⏰ Target passed!”;
+el2.className   = “on-track behind”;
 } else {
-var need = (100-op.pct)/days;
-el2.textContent = need<=1.5 ? “✅ On track (”+days+“d left)” : “⚠️ Behind (”+days+“d left)”;
-el2.className   = “on-track “+(need<=1.5?“ok”:“behind”);
+var need = (100 - op.pct) / days;
+el2.textContent = need <= 1.5 ? “✅ On track (” + days + “d left)” : “⚠️ Behind (” + days + “d left)”;
+el2.className   = “on-track “ + (need <= 1.5 ? “ok” : “behind”);
 }
 }
 
@@ -722,48 +773,78 @@ document.getElementById(“analyticsModal”).classList.add(“open”);
 renderAnalytics();
 }
 function closeAnalytics(e) {
-if (!e || e.target.id===“analyticsModal”)
+if (!e || e.target.id === “analyticsModal”) {
 document.getElementById(“analyticsModal”).classList.remove(“open”);
 }
+}
 function renderAnalytics() {
-var op = overallProg(), revTotal=0, revDone=0;
-ROADMAP.forEach(function(ph){ph.topics.forEach(function(t){t.subtopics.forEach(function(s){s.chapters.forEach(function(ch){
+var op = overallProg(), revTotal = 0, revDone = 0;
+ROADMAP.forEach(function(ph) {
+ph.topics.forEach(function(t) {
+t.subtopics.forEach(function(s) {
+s.chapters.forEach(function(ch) {
 revTotal++;
-if (state.checks[cbId(ph.id,t.id,s.id,slug(ch),“Rev1”)]) revDone++;
-});});});});
-var revPct = revTotal ? Math.round(revDone/revTotal*100) : 0;
+if (state.checks[cbId(ph.id, t.id, s.id, slug(ch), “Rev1”)]) revDone++;
+});
+});
+});
+});
+var revPct = revTotal ? Math.round(revDone / revTotal * 100) : 0;
 var weak = [];
-ROADMAP.forEach(function(ph){ph.topics.forEach(function(t){
-var tp=topicProg(ph,t); if(tp.pct<30&&tp.checked>0) weak.push(t.title+” (”+tp.pct+”%)”);
-});});
+ROADMAP.forEach(function(ph) {
+ph.topics.forEach(function(t) {
+var tp = topicProg(ph, t);
+if (tp.pct < 30 && tp.checked > 0) weak.push(t.title + “ (” + tp.pct + “%)”);
+});
+});
 
 var c = document.getElementById(“analyticsContent”);
 c.innerHTML = “”;
 
-var g = el(“div”,“analytics-grid”);
+var g = mkEl(“div”, “analytics-grid”);
 g.innerHTML =
-‘<div class="ana-card"><div class="ana-card-label">Overall</div><div class="ana-card-val">’+op.pct+’%</div><div class="ana-card-sub">’+op.checked+”/”+op.total+” boxes</div></div>”+
-‘<div class="ana-card"><div class="ana-card-label">Revision Coverage</div><div class="ana-card-val">’+revPct+’%</div><div class="ana-card-sub">’+revDone+”/”+revTotal+” Rev1</div></div>”+
-‘<div class="ana-card"><div class="ana-card-label">Streak</div><div class="ana-card-val">🔥 ‘+state.streak.currentStreak+’</div><div class="ana-card-sub">Best: ‘+state.streak.longestStreak+’</div></div>’+
-‘<div class="ana-card"><div class="ana-card-label">Last Active</div><div class="ana-card-val" style="font-size:16px">’+(state.streak.lastActiveDate||”—”)+’</div></div>’;
+‘<div class="ana-card"><div class="ana-card-label">Overall</div><div class="ana-card-val">’ + op.pct + ‘%</div><div class="ana-card-sub">’ + op.checked + “/” + op.total + “ boxes</div></div>” +
+‘<div class="ana-card"><div class="ana-card-label">Revision Coverage</div><div class="ana-card-val">’ + revPct + ‘%</div><div class="ana-card-sub">’ + revDone + “/” + revTotal + “ Rev1</div></div>” +
+’<div class="ana-card"><div class="ana-card-label">Streak</div><div class="ana-card-val">🔥 ’ + state.streak.currentStreak + ’</div><div class="ana-card-sub">Best: ’ + state.streak.longestStreak + “</div></div>” +
+‘<div class="ana-card"><div class="ana-card-label">Last Active</div><div class="ana-card-val" style="font-size:16px">’ + (state.streak.lastActiveDate || “—”) + “</div></div>”;
 c.appendChild(g);
 
-addTitle(c,“Phase-wise Progress”);
-ROADMAP.forEach(function(ph){ var pp=phaseProg(ph); addBar(c,ph.title.split(”:”).pop().trim().split(”(”)[0].trim(),pp.pct,ph.color); });
-addTitle(c,“Topic-wise Progress”);
-ROADMAP.forEach(function(ph){ ph.topics.forEach(function(t){ var tp=topicProg(ph,t); addBar(c,t.title.split(”(”)[0].trim(),tp.pct,ph.color); }); });
-addTitle(c,“⚠️ Weak Areas (<30% started)”);
-var wl = el(“div”,“weak-list”);
-if (!weak.length) { wl.innerHTML=’<span style="color:var(--text3);font-size:13px">None yet!</span>’; }
-else weak.forEach(function(w){ var t=el(“span”,“weak-tag”); t.textContent=w; wl.appendChild(t); });
+addTitle(c, “Phase-wise Progress”);
+ROADMAP.forEach(function(ph) {
+var pp = phaseProg(ph);
+addBar(c, ph.title.split(”:”).pop().trim().split(”(”)[0].trim(), pp.pct, ph.color);
+});
+addTitle(c, “Topic-wise Progress”);
+ROADMAP.forEach(function(ph) {
+ph.topics.forEach(function(t) {
+var tp = topicProg(ph, t);
+addBar(c, t.title.split(”(”)[0].trim(), tp.pct, ph.color);
+});
+});
+addTitle(c, “⚠️ Weak Areas (<30% started)”);
+var wl = mkEl(“div”, “weak-list”);
+if (!weak.length) {
+wl.innerHTML = ‘<span style="color:var(--text3);font-size:13px">None yet!</span>’;
+} else {
+weak.forEach(function(w) {
+var tag = mkEl(“span”, “weak-tag”);
+tag.textContent = w;
+wl.appendChild(tag);
+});
+}
 c.appendChild(wl);
 }
-function addTitle(p,txt){ var d=el(“div”,“ana-section-title”); d.textContent=txt; p.appendChild(d); }
-function addBar(p,label,pct,color){
-var r=el(“div”,“ana-bar-row”);
-r.innerHTML=’<div class="ana-bar-label" title="'+label+'">’+label+’</div>’+
-‘<div class="ana-bar-track"><div class="ana-bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div>’+
-‘<div class="ana-bar-pct">’+pct+’%</div>’;
+function addTitle(p, txt) {
+var d = mkEl(“div”, “ana-section-title”);
+d.textContent = txt;
+p.appendChild(d);
+}
+function addBar(p, label, pct, color) {
+var r = mkEl(“div”, “ana-bar-row”);
+r.innerHTML =
+‘<div class="ana-bar-label" title="' + label + '">’ + label + ‘</div>’ +
+‘<div class="ana-bar-track"><div class="ana-bar-fill" style="width:' + pct + '%;background:' + color + '"></div></div>’ +
+‘<div class="ana-bar-pct">’ + pct + ‘%</div>’;
 p.appendChild(r);
 }
 
@@ -778,8 +859,10 @@ initSearch();
 var di = document.getElementById(“globalTargetDate”);
 if (di) {
 if (state.targetDate) di.value = state.targetDate;
-di.addEventListener(“change”, function(){
-state.targetDate = di.value; saveState(); updateOnTrack();
+di.addEventListener(“change”, function() {
+state.targetDate = di.value;
+saveState();
+updateOnTrack();
 });
 }
 
@@ -787,8 +870,8 @@ state.targetDate = di.value; saveState(); updateOnTrack();
 document.addEventListener(“click”, function(e) {
 var sb  = document.getElementById(“sidebar”);
 var hbg = document.getElementById(“hamburger”);
-if (window.innerWidth<=768 && sb && sb.classList.contains(“mobile-open”) &&
-!sb.contains(e.target) && e.target!==hbg) {
+if (window.innerWidth <= 768 && sb && sb.classList.contains(“mobile-open”) &&
+!sb.contains(e.target) && e.target !== hbg) {
 sb.classList.remove(“mobile-open”);
 }
 });
