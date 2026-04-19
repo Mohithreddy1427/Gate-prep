@@ -605,17 +605,6 @@ wrap.className = “chapter-table-wrap”;
 const table = document.createElement(“table”);
 table.className = “chapter-table”;
 
-// colgroup — required so table-layout:fixed distributes columns correctly.
-// Without this, fixed layout splits columns evenly which misaligns ch name.
-const colgroup = document.createElement(“colgroup”);
-const colCh = document.createElement(“col”); // chapter name: flexible
-colgroup.appendChild(colCh);
-COLS.forEach(() => {
-const col = document.createElement(“col”); // each checkbox col: fixed via CSS
-colgroup.appendChild(col);
-});
-table.appendChild(colgroup);
-
 // thead
 const thead = document.createElement(“thead”);
 const hRow  = document.createElement(“tr”);
@@ -730,8 +719,8 @@ const op   = overallProgress();
 const circ = 2 * Math.PI * 34;
 const ring = document.getElementById(“overallRing”);
 if (ring) {
-ring.style.strokeDasharray  = String(circ);
-ring.style.strokeDashoffset = String(circ - (op.pct / 100) * circ);
+ring.setAttribute(“stroke-dasharray”,  String(circ));
+ring.setAttribute(“stroke-dashoffset”, String(circ - (op.pct / 100) * circ));
 }
 const pctEl = document.getElementById(“overallPct”);
 if (pctEl) pctEl.textContent = op.pct + “%”;
